@@ -13,6 +13,7 @@ from baselines.common.vec_env import (
     VecMonitor,
     VecNormalize
 )
+import time
 
 from ppo_daac_idaac import algo, utils
 from ppo_daac_idaac.arguments import parser
@@ -21,7 +22,7 @@ from ppo_daac_idaac.model import PPOnet, IDAACnet, \
 from ppo_daac_idaac.storage import DAACRolloutStorage, \
     IDAACRolloutStorage, RolloutStorage
 from ppo_daac_idaac.envs import VecPyTorchProcgen
-
+from contexts import contexts
 
 def train(args):
     args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -46,13 +47,17 @@ def train(args):
     torch.set_num_threads(1)
     device = torch.device("cuda:0" if args.cuda else "cpu")
 
-    log_file = '-{}-{}-s{}'.format(args.env_name, args.algo, args.seed)
+    log_file = '-{}-{}-s{}-c{}'.format(args.env_name, args.algo, args.seed, args.context)
     logger.configure(dir=args.log_dir, format_strs=['csv', 'stdout'], log_suffix=log_file)
     print("\nLog File: ", log_file)
 
     venv = ProcgenEnv(num_envs=args.num_processes, env_name=args.env_name, \
         num_levels=args.num_levels, start_level=args.start_level, \
-        distribution_mode=args.distribution_mode)
+        distribution_mode=args.distribution_mode,
+        context_options=[
+            contexts[args.env_name][args.context] for _ in range(args.num_processes)
+        ]
+        )
     venv = VecExtractDictObs(venv, "rgb")
     venv = VecMonitor(venv=venv, filename=None, keep_buf=100)
     venv = VecNormalize(venv=venv, ob=False)
@@ -225,9 +230,12 @@ def train(args):
             logger.logkv("train/median_episode_reward", np.median(episode_rewards))
 
             # Log eval stats (on the full distribution of levels) 
-            eval_episode_rewards = evaluate(args, actor_critic, device)
+            eval_episode_rewards = evaluate(args, actor_critic, device, contexts[args.env_name][args.context])
             logger.logkv("test/mean_episode_reward", np.mean(eval_episode_rewards))
             logger.logkv("test/median_episode_reward", np.median(eval_episode_rewards))
+            logger.logkv("log_time",  
+                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            )
 
             logger.dumpkvs()
 

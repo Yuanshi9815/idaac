@@ -169,3 +169,9 @@ parser.add_argument(
     type=int,
     default=0,
     help='start level id for sampling Procgen levels')
+
+parser.add_argument(
+    '--context',
+    type=str,
+    default='1',
+    help='context id to use for training')

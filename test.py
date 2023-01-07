@@ -11,12 +11,16 @@ from baselines.common.vec_env import (
 from ppo_daac_idaac.envs import VecPyTorchProcgen
 
 
-def evaluate(args, actor_critic, device):
+def evaluate(args, actor_critic, device, context=None, episodes=10):
     actor_critic.eval()
 
     # Sample Levels From the Full Distribution 
     venv = ProcgenEnv(num_envs=1, env_name=args.env_name, \
-        num_levels=0, start_level=0, distribution_mode=args.distribution_mode)
+        num_levels=0, start_level=0, distribution_mode=args.distribution_mode, 
+        context_options=[
+            context
+        ]
+        )
     venv = VecExtractDictObs(venv, "rgb")
     venv = VecMonitor(venv=venv, filename=None, keep_buf=100)
     venv = VecNormalize(venv=venv, ob=False)
@@ -25,7 +29,7 @@ def evaluate(args, actor_critic, device):
     eval_episode_rewards = []
     obs = eval_envs.reset()
 
-    while len(eval_episode_rewards) < 10:
+    while len(eval_episode_rewards) < episodes:
         with torch.no_grad():
             if args.algo == 'ppo':
                 _, action, _ = actor_critic.act(obs)
@@ -36,6 +40,7 @@ def evaluate(args, actor_critic, device):
 
         for info in infos:
             if 'episode' in info.keys():
+                print(info['episode'])
                 eval_episode_rewards.append(info['episode']['r'])
 
     eval_envs.close()
