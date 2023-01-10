@@ -7,13 +7,15 @@ import hyperparams as hps
 from test import evaluate
 from procgen import ProcgenEnv
 
-from baselines import logger
 from baselines.common.vec_env import (
     VecExtractDictObs,
     VecMonitor,
     VecNormalize
 )
 import time
+import datetime
+
+import wandb
 
 from ppo_daac_idaac import algo, utils
 from ppo_daac_idaac.arguments import parser
@@ -47,12 +49,32 @@ def train(args):
     torch.set_num_threads(1)
     device = torch.device("cuda:0" if args.cuda else "cpu")
 
-    log_file = '-{}-{}-s{}-c{}'.format(args.env_name, args.algo, args.seed, args.context)
-    logger.configure(dir=args.log_dir, format_strs=['csv', 'stdout'], log_suffix=log_file)
-    print("\nLog File: ", log_file)
+    run_name = '{}-{}-s{}-c{}'.format(int(time.time() * 1000), args.env_name, args.seed, args.context)
+    # make runs directory if it doesn't exist
+    if not os.path.exists(os.path.join('runs', run_name)):
+        os.makedirs(os.path.join('runs', run_name))
+    print("Run name: ", run_name)
+
+    # wandb init
+    wandb.init(
+        # set the wandb project where this run will be logged
+        project="ContextualProcgen",
+        
+        # track hyperparameters and run metadata
+        config={
+            "env_name": args.env_name,
+            "context_id": args.context,
+            "seed": args.seed,
+            "algo": args.algo,
+            "num_processes": args.num_processes,
+        },
+
+        # set the name of the run
+        name=run_name,
+    )
 
     venv = ProcgenEnv(num_envs=args.num_processes, env_name=args.env_name, \
-        num_levels=args.num_levels, start_level=args.start_level, \
+        num_levels=0, start_level=args.start_level, \
         distribution_mode=args.distribution_mode,
         context_options=[
             contexts[args.env_name][args.context] for _ in range(args.num_processes)
@@ -145,11 +167,15 @@ def train(args):
     rollouts.obs[0].copy_(obs)
     rollouts.to(device)
 
-    episode_rewards = deque(maxlen=10)
+    episode_info = {
+        'episode_reward': [],
+        'episode_length': [],
+    }
     num_updates = int(
         args.num_env_steps) // args.num_steps // args.num_processes 
 
     nsteps = torch.zeros(args.num_processes)
+    cur_save = 1
     for j in range(num_updates):
         actor_critic.train()
 
@@ -170,7 +196,8 @@ def train(args):
 
             for info in infos:
                 if 'episode' in info.keys():
-                    episode_rewards.append(info['episode']['r'])
+                    episode_info['episode_reward'].append(info['episode']['r'])
+                    episode_info['episode_length'].append(info['episode']['l'])
 
             # If done then clean the history of observations.
             masks = torch.FloatTensor(
@@ -203,42 +230,51 @@ def train(args):
             value_loss, action_loss, dist_entropy = agent.update(rollouts)    
         rollouts.after_update()
 
-        # Save Model
-        if j == num_updates - 1 and args.save_dir != "":
-            try:
-                os.makedirs(args.save_dir)
-            except OSError:
-                pass
+        total_num_steps = (j + 1) * args.num_processes * args.num_steps
+        # Save Model per args.model_save_interval total_num_steps
+        if total_num_steps / args.model_save_interval > cur_save:
+            cur_save += 1
+            if not os.path.exists(os.path.join(wandb.run.dir, 'models')):
+                os.makedirs(os.path.join(wandb.run.dir, 'models'))
+            torch.save(actor_critic, os.path.join(wandb.run.dir, 'models/model_{}.pt'.format(total_num_steps)))
+            # wandb
+            wandb.save(os.path.join(wandb.run.dir, 'models/model_{}.pt'.format(total_num_steps)))
 
-            torch.save([
-                actor_critic,
-                getattr(envs, 'ob_rms', None)
-            ], os.path.join(args.save_dir, "agent{}.pt".format(log_file))) 
 
         # Save Logs
-        total_num_steps = (j + 1) * args.num_processes * args.num_steps
-        if j % args.log_interval == 0 and len(episode_rewards) > 1:
-            total_num_steps = (j + 1) * args.num_processes * args.num_steps 
-            print("\nUpdate {}, step {}:".format(j, total_num_steps))
+        if j % args.log_interval == 0:
+            total_num_steps = (j + 1) * args.num_processes * args.num_steps
+            logs = {
+                "time_stamp": time.time(),
+                "update": j,
+                "total_num_steps": total_num_steps,
+                "value_loss": value_loss,
+                "action_loss": action_loss,
+                "dist_entropy": dist_entropy,
+            }
+            if len(episode_info['episode_length']) > 1:
+                episode_rewards = episode_info['episode_reward']
+                episode_lengths = episode_info['episode_length']
+                logs = {**logs, **{
+                    "mean_reward": np.mean(episode_rewards).item(),
+                    "median_reward": np.median(episode_rewards).item(),
+                    "min_reward": np.min(episode_rewards).item(),
+                    "max_reward": np.max(episode_rewards).item(),
+                    "mean_length": np.mean(episode_lengths).item(),
+                    "median_length": np.median(episode_lengths).item(),
+                    "min_length": np.min(episode_lengths).item(),
+                    "max_length": np.max(episode_lengths).item(),
+                }}
+            wandb.log(logs)
+            print("\nTime: {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+            print("Update {}, step {}:".format(j, total_num_steps))
             print("Last {} training episodes, mean/median reward {:.2f}/{:.2f}"\
                 .format(len(episode_rewards), np.mean(episode_rewards),
                         np.median(episode_rewards)))
-
-            # Log training stats
-            logger.logkv("train/total_num_steps", total_num_steps)            
-            logger.logkv("train/mean_episode_reward", np.mean(episode_rewards))
-            logger.logkv("train/median_episode_reward", np.median(episode_rewards))
-
-            # Log eval stats (on the full distribution of levels) 
-            eval_episode_rewards = evaluate(args, actor_critic, device, contexts[args.env_name][args.context])
-            logger.logkv("test/mean_episode_reward", np.mean(eval_episode_rewards))
-            logger.logkv("test/median_episode_reward", np.median(eval_episode_rewards))
-            logger.logkv("log_time",  
-                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-            )
-
-            logger.dumpkvs()
-
+            episode_info = {
+                'episode_reward': [],
+                'episode_length': [],
+            }
 
 if __name__ == "__main__":
     args = parser.parse_args()
