@@ -160,5 +160,40 @@ contexts = {
             "boss_bullet_vel": 0.8,
             "max_extra_invulnerable": 4,
         },
+    },
+    "bigfish":{
+        "1":{
+            "start_r": .5,
+        },
+        "2":{
+            "start_r": .6,
+        },
+        "3":{
+            "start_r": .7,
+        },
+        "4":{
+            "start_r": .8,
+        },
+        "5":{
+            "start_r": .9,
+        },
+        "6":{
+            "start_r": 1.,
+        },
+        "7":{
+            "start_r": 1.1,
+        },
+        "8":{
+            "start_r": 1.2,
+        },
+        "9":{
+            "start_r": 1.3,
+        },
+        "10":{
+            "start_r": 1.4,
+        },
+        "11":{
+            "start_r": 1.5,
+        },
     }
 }
