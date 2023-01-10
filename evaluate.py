@@ -13,6 +13,7 @@ from baselines.common.vec_env import (
     VecMonitor,
     VecNormalize
 )
+import json
 import time
 
 from ppo_daac_idaac import algo, utils
@@ -25,6 +26,14 @@ from ppo_daac_idaac.envs import VecPyTorchProcgen
 from contexts import contexts
 
 args = parser.parse_args()
+
+if os.path.exists('results/eval-{}-{}-s{}-c{}.json'.format(
+    args.env_name, args.algo, args.seed, args.context)):
+    exit()
+
+if not os.path.exists('models/agent-{}-{}-s{}-c{}.pt'.format(
+    args.env_name, args.algo, args.seed, args.context)):
+    exit()
 
 device = torch.device("cuda:0")
 
@@ -63,3 +72,13 @@ print(eval_episode_rewards)
 print(np.mean(eval_episode_rewards))
 print(np.std(eval_episode_rewards))
 print(np.median(eval_episode_rewards))
+
+res = {
+    'mean': np.mean(eval_episode_rewards).item(),
+    'std': np.std(eval_episode_rewards).item(),
+    'median': np.median(eval_episode_rewards).item(),
+    'data': [each.item() for each in eval_episode_rewards]
+}
+with open('results/eval-{}-{}-s{}-c{}.json'.format(
+    args.env_name, args.algo, args.seed, args.context), 'w') as f:
+    json.dump(res, f, indent=4)
