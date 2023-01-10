@@ -80,6 +80,11 @@ parser.add_argument(
     default=10,
     help='log interval, one log per n updates')
 parser.add_argument(
+    '--model_save_interval',
+    type=int,
+    default=1e6,
+    help='saving interval, one log per n updates')
+parser.add_argument(
     '--num_env_steps',
     type=int,
     default=25e6,
