@@ -181,105 +181,105 @@ contexts = {
             "min_barriers_num": 4
         },
         "45": {
-            "boss_r": 3.2,
+            "boss_r": 3.4,
             "max_barriers_num": 3,
             "min_barriers_num": 1
         },
         "46": {
-            "boss_r": 3.2,
+            "boss_r": 3.4,
             "max_barriers_num": 4,
             "min_barriers_num": 2
         },
         "47": {
-            "boss_r": 3.2,
+            "boss_r": 3.4,
             "max_barriers_num": 5,
             "min_barriers_num": 3
         },
         "48": {
-            "boss_r": 3.2,
+            "boss_r": 3.4,
             "max_barriers_num": 6,
             "min_barriers_num": 4
         },
         "49": {
-            "boss_r": 3.4,
+            "boss_r": 3.8,
             "max_barriers_num": 3,
             "min_barriers_num": 1
         },
         "50": {
-            "boss_r": 3.4,
+            "boss_r": 3.8,
             "max_barriers_num": 4,
             "min_barriers_num": 2
         },
         "51": {
-            "boss_r": 3.4,
+            "boss_r": 3.8,
             "max_barriers_num": 5,
             "min_barriers_num": 3
         },
         "52": {
-            "boss_r": 3.4,
+            "boss_r": 3.8,
             "max_barriers_num": 6,
             "min_barriers_num": 4
         },
         "53": {
-            "boss_r": 3.6,
+            "boss_r": 4.2,
             "max_barriers_num": 3,
             "min_barriers_num": 1
         },
         "54": {
-            "boss_r": 3.6,
+            "boss_r": 4.2,
             "max_barriers_num": 4,
             "min_barriers_num": 2
         },
         "55": {
-            "boss_r": 3.6,
+            "boss_r": 4.2,
             "max_barriers_num": 5,
             "min_barriers_num": 3
         },
         "56": {
-            "boss_r": 3.6,
+            "boss_r": 4.2,
             "max_barriers_num": 6,
             "min_barriers_num": 4
         },
         "57": {
-            "boss_r": 3.8,
+            "boss_r": 4.6,
             "max_barriers_num": 3,
             "min_barriers_num": 1
         },
         "58": {
-            "boss_r": 3.8,
+            "boss_r": 4.6,
             "max_barriers_num": 4,
             "min_barriers_num": 2
         },
         "59": {
-            "boss_r": 3.8,
+            "boss_r": 4.6,
             "max_barriers_num": 5,
             "min_barriers_num": 3
         },
         "60": {
-            "boss_r": 3.8,
+            "boss_r": 4.6,
             "max_barriers_num": 6,
             "min_barriers_num": 4
         },
         "61": {
-            "boss_r": 4.0,
+            "boss_r": 5.0,
             "max_barriers_num": 3,
             "min_barriers_num": 1
         },
         "62": {
-            "boss_r": 4.0,
+            "boss_r": 5.0,
             "max_barriers_num": 4,
             "min_barriers_num": 2
         },
         "63": {
-            "boss_r": 4.0,
+            "boss_r": 5.0,
             "max_barriers_num": 5,
             "min_barriers_num": 3
         },
         "64": {
-            "boss_r": 4.0,
+            "boss_r": 5.0,
             "max_barriers_num": 6,
             "min_barriers_num": 4
-        }    
+        }
     },
     "bigfish":{
         "1":{
