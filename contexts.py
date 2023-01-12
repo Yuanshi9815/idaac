@@ -279,7 +279,11 @@ contexts = {
             "boss_r": 5.0,
             "max_barriers_num": 6,
             "min_barriers_num": 4
-        }
+        },
+        "65": {
+            "max_barriers_num": 1,
+            "min_barriers_num": 1
+        },
     },
     "bigfish":{
         "1":{
@@ -315,5 +319,13 @@ contexts = {
         "11":{
             "start_r": 1.5,
         },
+    },
+    "leaper":{
+        "1":{
+            "world_dim": 13,
+            "max_road": 3,
+            "max_log": 3,
+            "max_extra_space": 2,
+        }
     }
 }

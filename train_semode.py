@@ -6,6 +6,7 @@ from collections import deque
 import hyperparams as hps
 from test import evaluate
 from procgen import ProcgenEnv
+from procgen.default_context import default_context_options
 
 from baselines.common.vec_env import (
     VecExtractDictObs,
@@ -72,23 +73,24 @@ def train(args):
         # set the name of the run
         name=run_name,
     )
-
+    env_context = {
+        **default_context_options[args.env_name],
+        **contexts[args.env_name][args.context]
+    }
+    # Add env_context into wandb config
+    wandb.config.update({"env_context": env_context})
     venv = ProcgenEnv(num_envs=args.num_processes, env_name=args.env_name, \
         num_levels=0, start_level=args.start_level, \
         distribution_mode=args.distribution_mode,
         context_options=[
-            contexts[args.env_name][args.context] for _ in range(args.num_processes)
+            env_context for _ in range(args.num_processes)
         ]
         )
-    env_context = venv.context_options[0]
     venv = VecExtractDictObs(venv, "rgb")
     venv = VecMonitor(venv=venv, filename=None, keep_buf=100)
     venv = VecNormalize(venv=venv, ob=False)
     envs = VecPyTorchProcgen(venv, device)
     
-    # Add env_context into wandb config
-    wandb.config.update({"env_context": env_context})
-
     obs_shape = envs.observation_space.shape     
     if args.algo == 'ppo':
         actor_critic = PPOnet(
