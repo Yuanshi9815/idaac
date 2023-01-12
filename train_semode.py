@@ -80,10 +80,14 @@ def train(args):
             contexts[args.env_name][args.context] for _ in range(args.num_processes)
         ]
         )
+    env_context = venv.context_options[0]
     venv = VecExtractDictObs(venv, "rgb")
     venv = VecMonitor(venv=venv, filename=None, keep_buf=100)
     venv = VecNormalize(venv=venv, ob=False)
     envs = VecPyTorchProcgen(venv, device)
+    
+    # Add env_context into wandb config
+    wandb.config.update({"env_context": env_context})
 
     obs_shape = envs.observation_space.shape     
     if args.algo == 'ppo':
@@ -264,6 +268,7 @@ def train(args):
                     "median_length": np.median(episode_lengths).item(),
                     "min_length": np.min(episode_lengths).item(),
                     "max_length": np.max(episode_lengths).item(),
+                    "episode_info": episode_info,
                 }}
             wandb.log(logs)
             print("\nTime: {}".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
