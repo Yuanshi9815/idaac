@@ -27,6 +27,18 @@ from ppo_daac_idaac.storage import DAACRolloutStorage, \
 from ppo_daac_idaac.envs import VecPyTorchProcgen
 from contexts import contexts
 
+def get_env(args, env_context, device):
+    venv = ProcgenEnv(num_envs=args.num_processes, env_name=args.env_name, \
+        num_levels=0, start_level=args.start_level, \
+        distribution_mode=args.distribution_mode,
+        context_options=env_context
+        )
+    venv = VecExtractDictObs(venv, "rgb")
+    venv = VecMonitor(venv=venv, filename=None, keep_buf=100)
+    venv = VecNormalize(venv=venv, ob=False)
+    envs = VecPyTorchProcgen(venv, device)
+    return envs
+
 def train(args):
     args.cuda = not args.no_cuda and torch.cuda.is_available()
     if args.use_best_hps:
@@ -78,18 +90,20 @@ def train(args):
         **contexts[args.env_name][args.context]
     }
     # Add env_context into wandb config
-    wandb.config.update({"env_context": env_context})
-    venv = ProcgenEnv(num_envs=args.num_processes, env_name=args.env_name, \
-        num_levels=0, start_level=args.start_level, \
-        distribution_mode=args.distribution_mode,
-        context_options=[
-            env_context for _ in range(args.num_processes)
-        ]
-        )
-    venv = VecExtractDictObs(venv, "rgb")
-    venv = VecMonitor(venv=venv, filename=None, keep_buf=100)
-    venv = VecNormalize(venv=venv, ob=False)
-    envs = VecPyTorchProcgen(venv, device)
+    wandb.config.update({"env_context": {"phasic": True}})
+    context_options = []
+    for i in range(args.num_processes):
+        if i < args.num_processes / 2:
+            context_options.append({
+                **env_context,
+                **{"max_road": 0, "max_log":5}
+            })
+        else:
+            context_options.append({
+                **env_context,
+                **{"max_road": 5, "max_log":0}
+            })
+    envs = get_env(args, context_options, device)
     
     obs_shape = envs.observation_space.shape     
     if args.algo == 'ppo':
@@ -182,8 +196,11 @@ def train(args):
 
     nsteps = torch.zeros(args.num_processes)
     cur_save = 1
+    phase_num = 0
     for j in range(num_updates):
         actor_critic.train()
+
+        total_num_steps = (j + 1) * args.num_processes * args.num_steps
 
         for step in range(args.num_steps):
             # Sample actions
@@ -194,6 +211,38 @@ def train(args):
                     adv, value, action, action_log_prob = actor_critic.act(rollouts.obs[step])
                                         
             obs, reward, done, infos = envs.step(action)
+
+            if step == args.num_steps - 1:
+                if total_num_steps > 5e6 and phase_num < 1:
+                    phase_num += 1
+                    context_options = []
+                    for i in range(args.num_processes):
+                        if i < args.num_processes / 3:
+                            context_options.append({
+                                **env_context,
+                                **{"max_road": 0, "max_log":5}
+                            })
+                        elif i < 2 * args.num_processes / 3:
+                            context_options.append({
+                                **env_context,
+                                **{"max_road": 5, "max_log":0}
+                            })
+                        else:
+                            context_options.append(env_context)
+                    envs = get_env(args, context_options, device)
+                    obs = envs.reset()
+                    reward = torch.zeros((args.num_processes,1))
+                    done = np.array([True for _ in range(args.num_processes)], dtype=bool)
+                    infos = [{} for _ in range(args.num_processes)]
+
+                elif total_num_steps > 10e6 and phase_num < 2:
+                    phase_num += 1
+                    context_options = [env_context for _ in range(args.num_processes)]
+                    envs = get_env(args, context_options, device)
+                    obs = envs.reset()
+                    reward = torch.zeros((args.num_processes,1))
+                    done = np.array([True for _ in range(args.num_processes)], dtype=bool)
+                    infos = [{} for _ in range(args.num_processes)]
 
             if args.algo == 'idaac':
                 levels = torch.LongTensor([info['level_seed'] for info in infos])
@@ -236,7 +285,6 @@ def train(args):
             value_loss, action_loss, dist_entropy = agent.update(rollouts)    
         rollouts.after_update()
 
-        total_num_steps = (j + 1) * args.num_processes * args.num_steps
         # Save Model per args.model_save_interval total_num_steps
         if total_num_steps / args.model_save_interval > cur_save:
             cur_save += 1
