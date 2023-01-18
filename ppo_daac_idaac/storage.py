@@ -12,6 +12,7 @@ class RolloutStorage(object):
         self.value_preds = torch.zeros(num_steps + 1, num_processes, 1)
         self.returns = torch.zeros(num_steps + 1, num_processes, 1)
         self.action_log_probs = torch.zeros(num_steps, num_processes, 1)
+        self.context_idxs = torch.zeros(num_steps, num_processes, 1, dtype=torch.long)
         if action_space.__class__.__name__ == 'Discrete':
             action_shape = 1
         else:
@@ -33,7 +34,7 @@ class RolloutStorage(object):
         self.masks = self.masks.to(device)
 
     def insert(self, obs, actions, action_log_probs, 
-               value_preds, rewards, masks):
+               value_preds, rewards, masks, context_idx):
         if len(rewards.shape) == 3: rewards = rewards.squeeze(2)
         self.obs[self.step + 1].copy_(obs)
         self.actions[self.step].copy_(actions)
@@ -41,6 +42,7 @@ class RolloutStorage(object):
         self.value_preds[self.step].copy_(value_preds)
         self.rewards[self.step].copy_(rewards)
         self.masks[self.step + 1].copy_(masks)
+        self.context_idxs[self.step].copy_(context_idx)
 
         self.step = (self.step + 1) % self.num_steps
 
@@ -91,13 +93,14 @@ class RolloutStorage(object):
             return_batch = self.returns[:-1].view(-1, 1)[indices]
             old_action_log_probs_batch = self.action_log_probs.view(-1,
                                                                     1)[indices]
+            context_idx_batch = self.context_idxs.view(-1, 1)[indices]
             if advantages is None:
                 adv_targ = None
             else:
                 adv_targ = advantages.view(-1, 1)[indices]
 
             yield obs_batch, actions_batch, value_preds_batch, \
-                return_batch, old_action_log_probs_batch, adv_targ
+                return_batch, old_action_log_probs_batch, adv_targ, context_idx_batch
 
 
 class DAACRolloutStorage(RolloutStorage):
