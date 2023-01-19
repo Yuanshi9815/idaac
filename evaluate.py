@@ -27,14 +27,6 @@ from contexts import contexts
 
 args = parser.parse_args()
 
-if os.path.exists('results/eval-{}-{}-s{}-c{}.json'.format(
-    args.env_name, args.algo, args.seed, args.context)):
-    exit()
-
-if not os.path.exists('models/agent-{}-{}-s{}-c{}.pt'.format(
-    args.env_name, args.algo, args.seed, args.context)):
-    exit()
-
 device = torch.device("cuda:0")
 
 venv = ProcgenEnv(num_envs=args.num_processes, env_name=args.env_name,
@@ -60,10 +52,10 @@ actor_critic = PPOnet(
 #     actor_critic,
 #     getattr(envs, 'ob_rms', None)
 # ], os.path.join(args.save_dir, "agent{}.pt".format(log_file))) 
-pt_path = 'models/agent-{}-{}-s{}-c{}.pt'.format(
+pt_path = 'tmp/model_16023552.pt'.format(
     args.env_name, args.algo, args.seed, args.context)
 
-actor_critic = torch.load(pt_path)[0]
+actor_critic = torch.load(pt_path)
 
 eval_episode_rewards = evaluate(
     args, actor_critic, device, contexts[args.env_name][args.context], episodes=100)

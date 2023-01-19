@@ -40,6 +40,7 @@ def get_env(args, env_context, device):
     return envs
 
 def train(args):
+    target_env_ratio = 0.25
     args.cuda = not args.no_cuda and torch.cuda.is_available()
     if args.use_best_hps:
         args.value_epoch = hps.value_epoch[args.env_name]
@@ -90,7 +91,7 @@ def train(args):
         **contexts[args.env_name][args.context]
     }
     # Add env_context into wandb config
-    wandb.config.update({"env_context": {"context_d_based": True}})
+    wandb.config.update({"env_context": {"context_d_based": True, "context_weight": False}})
     context_options = [env_context for _ in range(args.num_processes)]
     envs = get_env(args, context_options, device)
     
@@ -125,7 +126,7 @@ def train(args):
                                 envs.observation_space.shape, envs.action_space)
     else:
         rollouts = RolloutStorage(args.num_steps, args.num_processes,
-                                envs.observation_space.shape, envs.action_space)
+                                envs.observation_space.shape, envs.action_space, target_env_ratio)
 
     batch_size = int(args.num_processes * args.num_steps / args.num_mini_batch)
 
@@ -190,8 +191,8 @@ def train(args):
     context_distribution_2 = torch.ones(16)
     loss_weights = None
     for j in range(num_updates):
-        context_distribution_1 *= 0.0
-        context_distribution_2 *= 0.0
+        context_distribution_1 *= 0.95
+        context_distribution_2 *= 0.9
         actor_critic.train()
 
         total_num_steps = (j + 1) * args.num_processes * args.num_steps
@@ -204,15 +205,19 @@ def train(args):
                     adv, value, action, action_log_prob = actor_critic.act(rollouts.obs[step])
                                         
             obs, reward, done, infos = envs.step(action)
-            if loss_weights is None:
-                envs.venv.venv.venv.venv.env.c_sp = 1
+            if loss_weights is None :
+                envs.venv.venv.venv.venv.env.c_sp = -1
             else:
                 # generate a random number between 0 and 15, which probability is proportional to the loss weight
-                envs.venv.venv.venv.venv.env.c_sp = torch.multinomial(loss_weights, 1).item()
+                try:
+                    distribution_weights = torch.softmax((loss_weights*16-1)*2, dim=0)
+                    # distribution_weights = loss_weights
+                    envs.venv.venv.venv.venv.env.c_sp = torch.multinomial(distribution_weights, 1).item()
+                except Exception as e:
+                    print(e)
+                    envs.venv.venv.venv.venv.env.c_sp = -1
             # context_infos
             contexts_infos = torch.tensor([[info['context_info']] for info in infos], dtype=torch.long)
-            # print(contexts_infos)
-
             if step == args.num_steps - 1:
                 if total_num_steps > 5e6 and phase_num < 1:
                     phase_num += 1
@@ -237,13 +242,13 @@ def train(args):
                 if j == 0 and step == 0:
                     rollouts.levels[0].copy_(levels)
 
-            for index in range(args.num_processes):
-                if index < args.num_processes * 0.5:
-                    context_distribution_1[contexts_infos[index]] += 1
-                context_distribution_2[contexts_infos[index]] += 1
+            indexs = torch.arange(args.num_processes)
+            indexs_constant_d = torch.arange(int(args.num_processes * target_env_ratio))
+            context_distribution_1 += torch.bincount(contexts_infos[indexs_constant_d].view(-1), minlength=16)
+            context_distribution_2 += torch.bincount(contexts_infos[indexs].view(-1), minlength=16)
 
             for (index, info) in enumerate(infos):
-                if 'episode' in info.keys() and index < args.num_processes * 0.5:
+                if 'episode' in info.keys() and index < args.num_processes * target_env_ratio:
                     episode_info['episode_reward'].append(info['episode']['r'])
                     episode_info['episode_length'].append(info['episode']['l'])
 
@@ -263,11 +268,8 @@ def train(args):
                 rollouts.insert(obs, action, action_log_prob, value, \
                                 reward, masks, contexts_infos)
 
-        context_weights_1 = context_distribution_1 / context_distribution_1.sum()
-        context_weights_2 = context_distribution_2 / context_distribution_2.sum()
-        context_weights = context_weights_1 / context_weights_2
-        min_weight = max(context_weights.min().item(), 0.2)
-        context_weights = context_weights / min_weight
+        context_weights = context_distribution_1 / context_distribution_2
+        context_weights = context_weights  * (context_distribution_2.sum() / context_distribution_1.sum())
 
         with torch.no_grad():
             next_value = actor_critic.get_value(rollouts.obs[-1]).detach()
@@ -281,10 +283,11 @@ def train(args):
         elif args.algo == 'daac':
             adv_loss, value_loss, action_loss, dist_entropy = agent.update(rollouts)    
         else:
-            value_loss, action_loss, dist_entropy, loss_weights = agent.update(rollouts, context_weights)    
+            value_loss, action_loss, dist_entropy, loss_weights, loss_weights_all = agent.update(rollouts, context_weights)    
         rollouts.after_update()
         print('context_weights: ', context_weights)
-        print('loss_weights: ', loss_weights, '\n')
+        print('loss_weights: ', loss_weights_all)
+        print('distribution_weight: ', loss_weights, '\n')
 
         # Save Model per args.model_save_interval total_num_steps
         if total_num_steps / args.model_save_interval > cur_save:

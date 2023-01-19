@@ -6,13 +6,14 @@ from torch.utils.data.sampler import \
 
 
 class RolloutStorage(object):
-    def __init__(self, num_steps, num_processes, obs_shape, action_space):
+    def __init__(self, num_steps, num_processes, obs_shape, action_space, target_env_ratio):
         self.obs = torch.zeros(num_steps + 1, num_processes, *obs_shape)
         self.rewards = torch.zeros(num_steps, num_processes, 1)
         self.value_preds = torch.zeros(num_steps + 1, num_processes, 1)
         self.returns = torch.zeros(num_steps + 1, num_processes, 1)
         self.action_log_probs = torch.zeros(num_steps, num_processes, 1)
         self.context_idxs = torch.zeros(num_steps, num_processes, 1, dtype=torch.long)
+        self.loss_weight_masks = torch.zeros(num_steps, num_processes, 1)
         if action_space.__class__.__name__ == 'Discrete':
             action_shape = 1
         else:
@@ -23,6 +24,7 @@ class RolloutStorage(object):
         self.masks = torch.ones(num_steps + 1, num_processes, 1)
         self.num_steps = num_steps
         self.step = 0
+        self.target_env_ratio = target_env_ratio
         
     def to(self, device):
         self.obs = self.obs.to(device)
@@ -32,6 +34,8 @@ class RolloutStorage(object):
         self.action_log_probs = self.action_log_probs.to(device)
         self.actions = self.actions.to(device)
         self.masks = self.masks.to(device)
+        self.context_idxs = self.context_idxs.to(device)
+        self.loss_weight_masks = self.loss_weight_masks.to(device)
 
     def insert(self, obs, actions, action_log_probs, 
                value_preds, rewards, masks, context_idx):
@@ -70,6 +74,8 @@ class RolloutStorage(object):
                                mini_batch_size=None):
         num_steps, num_processes = self.rewards.size()[0:2]
         batch_size = num_processes * num_steps
+        self.loss_weight_masks[:,:int(num_processes*self.target_env_ratio),:] = 1.0
+        # self.loss_weight_masks[:,:,:] = 1.0
 
         if mini_batch_size is None:
             assert batch_size >= num_mini_batch, (
@@ -94,13 +100,14 @@ class RolloutStorage(object):
             old_action_log_probs_batch = self.action_log_probs.view(-1,
                                                                     1)[indices]
             context_idx_batch = self.context_idxs.view(-1, 1)[indices]
+            loss_weight_mask_batch = self.loss_weight_masks.view(-1, 1)[indices]
             if advantages is None:
                 adv_targ = None
             else:
                 adv_targ = advantages.view(-1, 1)[indices]
 
             yield obs_batch, actions_batch, value_preds_batch, \
-                return_batch, old_action_log_probs_batch, adv_targ, context_idx_batch
+                return_batch, old_action_log_probs_batch, adv_targ, context_idx_batch, loss_weight_mask_batch
 
 
 class DAACRolloutStorage(RolloutStorage):

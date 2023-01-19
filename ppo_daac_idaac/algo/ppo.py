@@ -35,10 +35,14 @@ class PPO():
 
         self.context_aloss_weights = torch.zeros(16)
         self.context_vloss_weights = torch.zeros(16)
+        self.context_aloss_weights_all = torch.zeros(16)
+        self.context_vloss_weights_all = torch.zeros(16)
         
     def update(self, rollouts, context_weights):
         self.context_aloss_weights *= 0.95
         self.context_vloss_weights *= 0.95
+        self.context_aloss_weights_all *= 0.95
+        self.context_vloss_weights_all *= 0.95
 
         advantages = rollouts.returns[:-1] - rollouts.value_preds[:-1]
         advantages = (advantages - advantages.mean()) / (
@@ -54,7 +58,7 @@ class PPO():
 
             for sample in data_generator:
                 obs_batch, actions_batch, value_preds_batch, return_batch, \
-                    old_action_log_probs_batch, adv_targ, context_idx = sample
+                    old_action_log_probs_batch, adv_targ, context_idx, loss_mask = sample
 
                 values, action_log_probs, dist_entropy = self.actor_critic.evaluate_actions(
                     obs_batch, actions_batch)
@@ -73,17 +77,14 @@ class PPO():
                     value_pred_clipped - return_batch).pow(2)
                 value_loss = 0.5 * torch.max(value_losses,
                                                 value_losses_clipped)
-                abs_a_loss = action_loss.abs()
-                abs_v_loss = value_loss.abs()
-                for sample_idx in range(int(len(context_idx) * 0.5)):
-                    self.context_aloss_weights[context_idx[sample_idx]] += abs_a_loss[sample_idx].item()
-                    self.context_vloss_weights[context_idx[sample_idx]] += abs_v_loss[sample_idx].item()
+                self.context_aloss_weights[context_idx] += (action_loss.abs() * loss_mask).cpu().detach()
+                self.context_vloss_weights[context_idx] += (value_loss.abs() * loss_mask).cpu().detach()
+                self.context_aloss_weights_all[context_idx] += (action_loss.abs()).cpu().detach()
+                self.context_vloss_weights_all[context_idx] += (value_loss.abs()).cpu().detach()
                 
-                weight_array = torch.ones_like(action_loss).to(action_loss.device)
-                for i in range(len(context_idx)):
-                    weight_array[i] = context_weights[context_idx[i]]
-                value_loss = value_loss * weight_array
-                action_loss = action_loss * weight_array
+                # weight_array = context_weights[context_idx].to(action_loss.device)
+                # value_loss = value_loss * weight_array
+                # action_loss = action_loss * weight_array
 
                 self.optimizer.zero_grad()
                 (value_loss.mean() * self.value_loss_coef + action_loss.mean() -
@@ -103,5 +104,7 @@ class PPO():
 
         loss_weights = self.context_aloss_weights + self.context_vloss_weights * self.value_loss_coef
         loss_weights = loss_weights / loss_weights.sum()
+        loss_weights_all = self.context_aloss_weights_all + self.context_vloss_weights_all * self.value_loss_coef
+        loss_weights_all = loss_weights_all / loss_weights_all.sum()
 
-        return value_loss_epoch, action_loss_epoch, dist_entropy_epoch, loss_weights
+        return value_loss_epoch, action_loss_epoch, dist_entropy_epoch, loss_weights, loss_weights_all
