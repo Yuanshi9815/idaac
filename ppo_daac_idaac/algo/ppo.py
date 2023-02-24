@@ -16,6 +16,7 @@ class PPO():
                  num_mini_batch,
                  value_loss_coef,
                  entropy_coef,
+                 context_prod_dim,
                  lr=None,
                  eps=None,
                  max_grad_norm=None):
@@ -33,16 +34,16 @@ class PPO():
 
         self.optimizer = optim.Adam(actor_critic.parameters(), lr=lr, eps=eps)
 
-        self.context_aloss_weights = torch.zeros(16)
-        self.context_vloss_weights = torch.zeros(16)
-        self.context_aloss_weights_all = torch.zeros(16)
-        self.context_vloss_weights_all = torch.zeros(16)
+        self.context_aloss = torch.zeros(context_prod_dim)
+        self.context_vloss = torch.zeros(context_prod_dim)
+        self.context_aloss_all = torch.zeros(context_prod_dim)
+        self.context_vloss_all = torch.zeros(context_prod_dim)
         
     def update(self, rollouts, context_weights):
-        self.context_aloss_weights *= 0.95
-        self.context_vloss_weights *= 0.95
-        self.context_aloss_weights_all *= 0.95
-        self.context_vloss_weights_all *= 0.95
+        self.context_aloss *= 0
+        self.context_vloss *= 0
+        self.context_aloss_all *= 0
+        self.context_vloss_all *= 0
 
         advantages = rollouts.returns[:-1] - rollouts.value_preds[:-1]
         advantages = (advantages - advantages.mean()) / (
@@ -59,6 +60,8 @@ class PPO():
             for sample in data_generator:
                 obs_batch, actions_batch, value_preds_batch, return_batch, \
                     old_action_log_probs_batch, adv_targ, context_idx, loss_mask = sample
+                
+                context_idx = context_idx.to('cpu').squeeze(1)
 
                 values, action_log_probs, dist_entropy = self.actor_critic.evaluate_actions(
                     obs_batch, actions_batch)
@@ -77,12 +80,14 @@ class PPO():
                     value_pred_clipped - return_batch).pow(2)
                 value_loss = 0.5 * torch.max(value_losses,
                                                 value_losses_clipped)
-                self.context_aloss_weights[context_idx] += (action_loss.abs() * loss_mask).cpu().detach()
-                self.context_vloss_weights[context_idx] += (value_loss.abs() * loss_mask).cpu().detach()
-                self.context_aloss_weights_all[context_idx] += (action_loss.abs()).cpu().detach()
-                self.context_vloss_weights_all[context_idx] += (value_loss.abs()).cpu().detach()
+                self.context_aloss.index_add_(0, context_idx, (action_loss.abs() * loss_mask).view(-1).cpu().detach())
+                self.context_vloss.index_add_(0, context_idx, (value_loss.abs() * loss_mask).view(-1).cpu().detach())
+                self.context_aloss_all.index_add_(0, context_idx, (action_loss.abs()).view(-1).cpu().detach())
+                self.context_vloss_all.index_add_(0, context_idx, (value_loss.abs()).view(-1).cpu().detach())
                 
-                # weight_array = context_weights[context_idx].to(action_loss.device)
+                # context_weights_min = torch.min(context_weights)
+                # weights = torch.log(context_weights/context_weights_min) + 1
+                # weight_array = weights[context_idx].to(action_loss.device)
                 # value_loss = value_loss * weight_array
                 # action_loss = action_loss * weight_array
 
@@ -102,9 +107,16 @@ class PPO():
         action_loss_epoch /= num_updates
         dist_entropy_epoch /= num_updates
 
-        loss_weights = self.context_aloss_weights + self.context_vloss_weights * self.value_loss_coef
-        loss_weights = loss_weights / loss_weights.sum()
-        loss_weights_all = self.context_aloss_weights_all + self.context_vloss_weights_all * self.value_loss_coef
-        loss_weights_all = loss_weights_all / loss_weights_all.sum()
+        # loss_weights = self.context_aloss + self.context_vloss * self.value_loss_coef
+        # loss_weights = loss_weights / loss_weights.sum()
+        # loss_weights_all = self.context_aloss_all + self.context_vloss_all * self.value_loss_coef
+        # loss_weights_all = loss_weights_all / loss_weights_all.sum()
 
-        return value_loss_epoch, action_loss_epoch, dist_entropy_epoch, loss_weights, loss_weights_all
+        loss_info = {
+            'context_aloss': self.context_aloss.detach().cpu(),
+            'context_vloss': self.context_vloss.detach().cpu(),
+            'context_aloss_all': self.context_aloss_all.detach().cpu(),
+            'context_vloss_all': self.context_vloss_all.detach().cpu(),
+        }
+
+        return value_loss_epoch, action_loss_epoch, dist_entropy_epoch, loss_info

@@ -180,3 +180,9 @@ parser.add_argument(
     type=str,
     default='1',
     help='context id to use for training')
+
+parser.add_argument(
+    '--debug',
+    action='store_true',
+    default=False,
+    help='whether to use wandb')
