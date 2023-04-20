@@ -1,9 +1,11 @@
 import os
-import torch
+import datetime
+import time
 import numpy as np
 from collections import deque
 
 import hyperparams as hps
+import torch
 from test import evaluate
 from procgen import ProcgenEnv
 from procgen.default_context import default_context_options
@@ -13,18 +15,16 @@ from baselines.common.vec_env import (
     VecMonitor,
     VecNormalize
 )
-import time
-import datetime
 
 import wandb
 
-from ppo_daac_idaac import algo, utils
-from ppo_daac_idaac.arguments import parser
-from ppo_daac_idaac.model import PPOnet, IDAACnet, \
+from src import algo, utils
+from src.arguments import parser
+from src.model import PPOnet, IDAACnet, \
     LinearOrderClassifier, NonlinearOrderClassifier
-from ppo_daac_idaac.storage import DAACRolloutStorage, \
+from src.storage import DAACRolloutStorage, \
     IDAACRolloutStorage, RolloutStorage
-from ppo_daac_idaac.envs import VecPyTorchProcgen
+from src.envs import VecPyTorchProcgen
 from contexts import contexts
 
 from acl_settings import settings
