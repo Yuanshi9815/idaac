@@ -41,4 +41,7 @@ class VecPyTorchProcgen(VecEnvWrapper):
         obs = torch.from_numpy(obs).float().to(self.device) / 255.
         reward = torch.from_numpy(reward).unsqueeze(dim=1).float()
         return obs, reward, done, info
-        
+
+
+class ContextualProcgen(VecEnvWrapper):
+    pass

@@ -16,7 +16,7 @@ class PPO():
                  num_mini_batch,
                  value_loss_coef,
                  entropy_coef,
-                 context_prod_dim,
+                #  context_prod_dim,
                  lr=None,
                  eps=None,
                  max_grad_norm=None):
@@ -34,16 +34,16 @@ class PPO():
 
         self.optimizer = optim.Adam(actor_critic.parameters(), lr=lr, eps=eps)
 
-        self.context_aloss = torch.zeros(context_prod_dim)
-        self.context_vloss = torch.zeros(context_prod_dim)
-        self.context_aloss_all = torch.zeros(context_prod_dim)
-        self.context_vloss_all = torch.zeros(context_prod_dim)
+        # self.context_aloss = torch.zeros(context_prod_dim)
+        # self.context_vloss = torch.zeros(context_prod_dim)
+        # self.context_aloss_all = torch.zeros(context_prod_dim)
+        # self.context_vloss_all = torch.zeros(context_prod_dim)
         
     def update(self, rollouts, context_weights):
-        self.context_aloss *= 0
-        self.context_vloss *= 0
-        self.context_aloss_all *= 0
-        self.context_vloss_all *= 0
+        # self.context_aloss *= 0
+        # self.context_vloss *= 0
+        # self.context_aloss_all *= 0
+        # self.context_vloss_all *= 0
 
         advantages = rollouts.returns[:-1] - rollouts.value_preds[:-1]
         advantages = (advantages - advantages.mean()) / (
@@ -80,10 +80,10 @@ class PPO():
                     value_pred_clipped - return_batch).pow(2)
                 value_loss = 0.5 * torch.max(value_losses,
                                                 value_losses_clipped)
-                self.context_aloss.index_add_(0, context_idx, (action_loss.abs() * loss_mask).view(-1).cpu().detach())
-                self.context_vloss.index_add_(0, context_idx, (value_loss.abs() * loss_mask).view(-1).cpu().detach())
-                self.context_aloss_all.index_add_(0, context_idx, (action_loss.abs()).view(-1).cpu().detach())
-                self.context_vloss_all.index_add_(0, context_idx, (value_loss.abs()).view(-1).cpu().detach())
+                # self.context_aloss.index_add_(0, context_idx, (action_loss.abs() * loss_mask).view(-1).cpu().detach())
+                # self.context_vloss.index_add_(0, context_idx, (value_loss.abs() * loss_mask).view(-1).cpu().detach())
+                # self.context_aloss_all.index_add_(0, context_idx, (action_loss.abs()).view(-1).cpu().detach())
+                # self.context_vloss_all.index_add_(0, context_idx, (value_loss.abs()).view(-1).cpu().detach())
                 
                 # context_weights_min = torch.min(context_weights)
                 # weights = torch.log(context_weights/context_weights_min) + 1
@@ -113,10 +113,10 @@ class PPO():
         # loss_weights_all = loss_weights_all / loss_weights_all.sum()
 
         loss_info = {
-            'context_aloss': self.context_aloss.detach().cpu(),
-            'context_vloss': self.context_vloss.detach().cpu(),
-            'context_aloss_all': self.context_aloss_all.detach().cpu(),
-            'context_vloss_all': self.context_vloss_all.detach().cpu(),
+            # 'context_aloss': self.context_aloss.detach().cpu(),
+            # 'context_vloss': self.context_vloss.detach().cpu(),
+            # 'context_aloss_all': self.context_aloss_all.detach().cpu(),
+            # 'context_vloss_all': self.context_vloss_all.detach().cpu(),
         }
 
         return value_loss_epoch, action_loss_epoch, dist_entropy_epoch, loss_info

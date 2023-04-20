@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ppo_daac_idaac.utils import init
-from ppo_daac_idaac.distributions import Categorical
+from src.utils import init
+from src.distributions import Categorical
 
 
 init_ = lambda m: init(m, nn.init.orthogonal_, lambda x: nn.init.
