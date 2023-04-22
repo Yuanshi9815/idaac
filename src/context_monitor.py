@@ -55,8 +55,8 @@ class ContextMonitor(object):
         return idxs
     
     def before_algo_step(self):
-        for _ in range(len(self.contextual_episode_info)):
-            self.contextual_episode_info = get_empty_episode_info()
+        for i in range(len(self.contextual_episode_info)):
+            self.contextual_episode_info[i] = get_empty_episode_info()
         self.episode_info_a_env = get_empty_episode_info()
         self.episode_info_t_env = get_empty_episode_info()
         self.episode_info_c_env = get_empty_episode_info()
