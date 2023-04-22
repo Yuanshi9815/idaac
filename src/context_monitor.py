@@ -1,10 +1,11 @@
 import json
 import numpy as np
 
-episode_info_example = {
-    "episode_return": [],
-    "episode_length": [],
-}
+def get_empty_episode_info():
+    return {
+        "episode_return": [],
+        "episode_length": [],
+    }
 
 training_info_example = {
     "value_loss": np.array([]),
@@ -22,9 +23,9 @@ class ContextMonitor(object):
         self.context_id_to_str = {}
         # update when episode ends
         self.contextual_episode_info = [] # all envs
-        self.episode_info_t_env = episode_info_example.copy() # target en
-        self.episode_info_c_env = episode_info_example.copy() # contextual env
-        self.episode_info_a_env = episode_info_example.copy() # all envs
+        self.episode_info_t_env = get_empty_episode_info() # target en
+        self.episode_info_c_env = get_empty_episode_info() # contextual env
+        self.episode_info_a_env = get_empty_episode_info() # all envs
 
         # update after each algorithm step (update)
         self.taining_info_t_env = {}
@@ -38,7 +39,7 @@ class ContextMonitor(object):
             context_id = len(self.context_str_to_id)
             self.context_str_to_id[context_str] = context_id
             self.context_id_to_str[context_id] = context_str
-            self.contextual_episode_info.append(episode_info_example.copy())
+            self.contextual_episode_info.append(get_empty_episode_info())
             with open(self.log_path + '/context_id_map.json', 'w') as f:
                 f.write(json.dumps({
                     'context_str_to_id': self.context_str_to_id,
@@ -54,17 +55,11 @@ class ContextMonitor(object):
         return idxs
     
     def before_algo_step(self):
-        maintain_ratio = 1/2
-        # drop the two thirds of the oldest episode info
-        for i in range(len(self.contextual_episode_info)):
-            # len_all = max(int(len(self.contextual_episode_info[i]["episode_return"])*maintain_ratio),1)
-            # self.contextual_episode_info[i]["episode_length"] = self.contextual_episode_info[i]["episode_length"][-len_all:]
-            # self.contextual_episode_info[i]["episode_return"] = self.contextual_episode_info[i]["episode_return"][-len_all:]
-            self.contextual_episode_info[i]["episode_length"] = []
-            self.contextual_episode_info[i]["episode_return"] = []
-        self.episode_info_a_env = episode_info_example.copy()
-        self.episode_info_t_env = episode_info_example.copy()
-        self.episode_info_c_env = episode_info_example.copy()
+        for _ in range(len(self.contextual_episode_info)):
+            self.contextual_episode_info = get_empty_episode_info()
+        self.episode_info_a_env = get_empty_episode_info()
+        self.episode_info_t_env = get_empty_episode_info()
+        self.episode_info_c_env = get_empty_episode_info()
 
     def before_env_step(self):
         pass
@@ -82,13 +77,9 @@ class ContextMonitor(object):
         self.loss_info = loss_info
 
     def after_algo_step(self):
-        # 将tensor转换为可以被json序列化的形式，尤其是要注意float32的转换
         new_loss_info = {
             key: [float(v) for v in value.tolist()] for key, value in self.loss_info.items()
         }
-        # print("loss_info", new_loss_info)
-        # print("contextual_episode_info", self.contextual_episode_info)
-        # save the loss info
         with open(self.log_path + '/raw_log.json', 'a') as f:
             f.write(json.dumps({
                 'loss_info': new_loss_info,
