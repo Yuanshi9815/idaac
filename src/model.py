@@ -338,8 +338,7 @@ class PPOnet(nn.Module):
         dist = self.dist(actor_features)
 
         action_log_probs = dist.log_probs(action)
-        dist_entropy = dist.entropy().mean()
-        
+        dist_entropy = dist.entropy()
         return value, action_log_probs, dist_entropy
 
 

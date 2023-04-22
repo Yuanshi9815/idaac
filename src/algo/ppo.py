@@ -16,7 +16,7 @@ class PPO():
                  num_mini_batch,
                  value_loss_coef,
                  entropy_coef,
-                #  context_prod_dim,
+                 context_space,
                  lr=None,
                  eps=None,
                  max_grad_norm=None):
@@ -33,18 +33,10 @@ class PPO():
         self.max_grad_norm = max_grad_norm
 
         self.optimizer = optim.Adam(actor_critic.parameters(), lr=lr, eps=eps)
+        self.context_space = context_space
 
-        # self.context_aloss = torch.zeros(context_prod_dim)
-        # self.context_vloss = torch.zeros(context_prod_dim)
-        # self.context_aloss_all = torch.zeros(context_prod_dim)
-        # self.context_vloss_all = torch.zeros(context_prod_dim)
         
     def update(self, rollouts, context_weights):
-        # self.context_aloss *= 0
-        # self.context_vloss *= 0
-        # self.context_aloss_all *= 0
-        # self.context_vloss_all *= 0
-
         advantages = rollouts.returns[:-1] - rollouts.value_preds[:-1]
         advantages = (advantages - advantages.mean()) / (
             advantages.std() + 1e-5)
@@ -80,26 +72,46 @@ class PPO():
                     value_pred_clipped - return_batch).pow(2)
                 value_loss = 0.5 * torch.max(value_losses,
                                                 value_losses_clipped)
-                # self.context_aloss.index_add_(0, context_idx, (action_loss.abs() * loss_mask).view(-1).cpu().detach())
-                # self.context_vloss.index_add_(0, context_idx, (value_loss.abs() * loss_mask).view(-1).cpu().detach())
-                # self.context_aloss_all.index_add_(0, context_idx, (action_loss.abs()).view(-1).cpu().detach())
-                # self.context_vloss_all.index_add_(0, context_idx, (value_loss.abs()).view(-1).cpu().detach())
-                
-                # context_weights_min = torch.min(context_weights)
-                # weights = torch.log(context_weights/context_weights_min) + 1
-                # weight_array = weights[context_idx].to(action_loss.device)
-                # value_loss = value_loss * weight_array
-                # action_loss = action_loss * weight_array
+
+                # 将loss mask转换为两层的tensor，一层是loss mask，一层是1-loss mask
+                loss_mask = loss_mask.view(-1, 1)
+                loss_mask = torch.cat((loss_mask, 1-loss_mask), dim=1)
+
+                # loss mask对应的是target，也就是plow_t, vloss_t, entrp_t
+                # 而1-loss mask对应的是contextal的，也就是ploss_c, vloss_c, entrp_c
+                action_loss_separated = action_loss.view(-1, 1) * loss_mask
+                value_loss_separated = value_loss.view(-1, 1) * loss_mask
+                dist_entropy_separated = dist_entropy.view(-1, 1) * loss_mask
+
+                ploss_t = torch.zeros(self.context_space)
+                vloss_t = torch.zeros(self.context_space)
+                entrp_t = torch.zeros(self.context_space)
+                tloss_t = torch.zeros(self.context_space)
+                ploss_c = torch.zeros(self.context_space)
+                vloss_c = torch.zeros(self.context_space)
+                entrp_c = torch.zeros(self.context_space)
+                tloss_c = torch.zeros(self.context_space)
+
+
+                # 将loss mask对应的loss加到target上，将1-loss mask对应的loss加到contextal上
+                ploss_t.index_add_(0, context_idx, action_loss_separated[:, 0].abs().cpu().detach())
+                vloss_t.index_add_(0, context_idx, value_loss_separated[:, 0].abs().cpu().detach())
+                entrp_t.index_add_(0, context_idx, dist_entropy_separated[:, 0].abs().cpu().detach())
+                tloss_t.index_add_(0, context_idx, (action_loss_separated[:, 0] + value_loss_separated[:, 0] - dist_entropy_separated[:, 0] * self.entropy_coef).abs().cpu().detach())
+                ploss_c.index_add_(0, context_idx, action_loss_separated[:, 1].abs().cpu().detach())
+                vloss_c.index_add_(0, context_idx, value_loss_separated[:, 1].abs().cpu().detach())
+                entrp_c.index_add_(0, context_idx, dist_entropy_separated[:, 1].abs().cpu().detach())
+                tloss_c.index_add_(0, context_idx, (action_loss_separated[:, 1] + value_loss_separated[:, 1] - dist_entropy_separated[:, 1] * self.entropy_coef).abs().cpu().detach())
 
                 self.optimizer.zero_grad()
                 (value_loss.mean() * self.value_loss_coef + action_loss.mean() -
-                    dist_entropy * self.entropy_coef).backward()
+                    dist_entropy.mean() * self.entropy_coef).backward()
                 nn.utils.clip_grad_norm_(self.actor_critic.parameters(),
                                         self.max_grad_norm)
                 self.optimizer.step()  
                 value_loss_epoch += value_loss.mean().item()
                 action_loss_epoch += action_loss.mean().item()
-                dist_entropy_epoch += dist_entropy.item()
+                dist_entropy_epoch += dist_entropy.mean().item()
 
         num_updates = self.ppo_epoch * self.num_mini_batch
 
@@ -107,16 +119,15 @@ class PPO():
         action_loss_epoch /= num_updates
         dist_entropy_epoch /= num_updates
 
-        # loss_weights = self.context_aloss + self.context_vloss * self.value_loss_coef
-        # loss_weights = loss_weights / loss_weights.sum()
-        # loss_weights_all = self.context_aloss_all + self.context_vloss_all * self.value_loss_coef
-        # loss_weights_all = loss_weights_all / loss_weights_all.sum()
-
         loss_info = {
-            # 'context_aloss': self.context_aloss.detach().cpu(),
-            # 'context_vloss': self.context_vloss.detach().cpu(),
-            # 'context_aloss_all': self.context_aloss_all.detach().cpu(),
-            # 'context_vloss_all': self.context_vloss_all.detach().cpu(),
+            'policy_loss_t': ploss_t,
+            'value_loss_t': vloss_t,
+            'entropy_t': entrp_t,
+            'policy_loss_c': ploss_c,
+            'value_loss_c': vloss_c,
+            'entropy_c': entrp_c,
+            'total_loss_t': tloss_t,
+            'total_loss_c': tloss_c
         }
 
         return value_loss_epoch, action_loss_epoch, dist_entropy_epoch, loss_info

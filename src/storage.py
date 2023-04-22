@@ -25,7 +25,6 @@ class RolloutStorage(object):
         self.num_steps = num_steps
         self.step = 0
         self.target_env_ratio = target_env_ratio
-        self.context_map = {}
 
         
     def to(self, device):
@@ -40,7 +39,7 @@ class RolloutStorage(object):
         self.loss_weight_masks = self.loss_weight_masks.to(device)
 
     def insert(self, obs, actions, action_log_probs, 
-               value_preds, rewards, masks, contexts_infos):
+               value_preds, rewards, masks, contexts_idx):
         if len(rewards.shape) == 3: rewards = rewards.squeeze(2)
         self.obs[self.step + 1].copy_(obs)
         self.actions[self.step].copy_(actions)
@@ -48,11 +47,7 @@ class RolloutStorage(object):
         self.value_preds[self.step].copy_(value_preds)
         self.rewards[self.step].copy_(rewards)
         self.masks[self.step + 1].copy_(masks)
-        for context_info in contexts_infos:
-            if context_info not in self.context_map:
-                self.context_map[context_info] = len(self.context_map)
-        context_idx = torch.tensor([self.context_map[context_info] for context_info in contexts_infos], dtype=torch.long).unsqueeze(1)
-        # print(context_idx.shape, self.context_idxs[self.step].shape)
+        context_idx = torch.tensor(contexts_idx, dtype=torch.long).unsqueeze(1)
         self.context_idxs[self.step].copy_(context_idx)
         self.step = (self.step + 1) % self.num_steps
 
