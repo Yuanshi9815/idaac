@@ -1,0 +1,44 @@
+{
+    "0": {
+        "context": {
+            "maze_dim": 5,
+            "num_keys": 0
+        },
+        "prob": 0.16633056095843823
+    },
+    "1": {
+        "context": {
+            "maze_dim": 5,
+            "num_keys": 1
+        },
+        "prob": 0.16678400534587068
+    },
+    "2": {
+        "context": {
+            "maze_dim": 7,
+            "num_keys": 1
+        },
+        "prob": 0.16733291170960468
+    },
+    "3": {
+        "context": {
+            "maze_dim": 7,
+            "num_keys": 2
+        },
+        "prob": 0.1656503943772896
+    },
+    "4": {
+        "context": {
+            "maze_dim": 9,
+            "num_keys": 2
+        },
+        "prob": 0.16782215433815018
+    },
+    "5": {
+        "context": {
+            "maze_dim": 9,
+            "num_keys": 3
+        },
+        "prob": 0.16607997327064664
+    }
+}

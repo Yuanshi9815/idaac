@@ -1,0 +1,114 @@
+{
+    "0": {
+        "context": {
+            "exit_wall_id": 0,
+            "num_enemies": 3
+        },
+        "prob": 0.062320584489866396
+    },
+    "1": {
+        "context": {
+            "exit_wall_id": 0,
+            "num_enemies": 4
+        },
+        "prob": 0.06251753685437396
+    },
+    "2": {
+        "context": {
+            "exit_wall_id": 0,
+            "num_enemies": 5
+        },
+        "prob": 0.06229180606217579
+    },
+    "3": {
+        "context": {
+            "exit_wall_id": 0,
+            "num_enemies": 6
+        },
+        "prob": 0.06224144381371724
+    },
+    "4": {
+        "context": {
+            "exit_wall_id": 1,
+            "num_enemies": 3
+        },
+        "prob": 0.062445590785147456
+    },
+    "5": {
+        "context": {
+            "exit_wall_id": 1,
+            "num_enemies": 4
+        },
+        "prob": 0.06242220831264884
+    },
+    "6": {
+        "context": {
+            "exit_wall_id": 1,
+            "num_enemies": 5
+        },
+        "prob": 0.06258858359773514
+    },
+    "7": {
+        "context": {
+            "exit_wall_id": 1,
+            "num_enemies": 6
+        },
+        "prob": 0.06245908067312742
+    },
+    "8": {
+        "context": {
+            "exit_wall_id": 2,
+            "num_enemies": 3
+        },
+        "prob": 0.06286197866079586
+    },
+    "9": {
+        "context": {
+            "exit_wall_id": 2,
+            "num_enemies": 4
+        },
+        "prob": 0.06241231572813019
+    },
+    "10": {
+        "context": {
+            "exit_wall_id": 2,
+            "num_enemies": 5
+        },
+        "prob": 0.06242040966091818
+    },
+    "11": {
+        "context": {
+            "exit_wall_id": 2,
+            "num_enemies": 6
+        },
+        "prob": 0.0627594555121481
+    },
+    "12": {
+        "context": {
+            "exit_wall_id": 3,
+            "num_enemies": 3
+        },
+        "prob": 0.06246357730245408
+    },
+    "13": {
+        "context": {
+            "exit_wall_id": 3,
+            "num_enemies": 4
+        },
+        "prob": 0.062345765614095675
+    },
+    "14": {
+        "context": {
+            "exit_wall_id": 3,
+            "num_enemies": 5
+        },
+        "prob": 0.0626677242738843
+    },
+    "15": {
+        "context": {
+            "exit_wall_id": 3,
+            "num_enemies": 6
+        },
+        "prob": 0.06278193865878137
+    }
+}

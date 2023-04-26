@@ -42,7 +42,7 @@ def get_env(args, env_context, device):
 
 def train(args):
     target_env_ratio = 0.5 # the ratio of target env to all envs
-    context_space = 100  # the maximum number of discrete contexts
+    context_space = 150  # the maximum number of discrete contexts
     args.cuda = not args.no_cuda and torch.cuda.is_available()
     print("\nArguments: ", args)
 

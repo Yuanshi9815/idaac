@@ -1,0 +1,44 @@
+{
+    "0": {
+        "context": {
+            "difficulty": 1,
+            "num_sections": 1
+        },
+        "prob": 0.3331339390174874
+    },
+    "1": {
+        "context": {
+            "difficulty": 2,
+            "num_sections": 2
+        },
+        "prob": 0.16624204479827687
+    },
+    "2": {
+        "context": {
+            "difficulty": 2,
+            "num_sections": 3
+        },
+        "prob": 0.16706870837260943
+    },
+    "3": {
+        "context": {
+            "difficulty": 3,
+            "num_sections": 3
+        },
+        "prob": 0.11122528763873883
+    },
+    "4": {
+        "context": {
+            "difficulty": 3,
+            "num_sections": 4
+        },
+        "prob": 0.11117476930919629
+    },
+    "5": {
+        "context": {
+            "difficulty": 3,
+            "num_sections": 5
+        },
+        "prob": 0.11115525086369121
+    }
+}

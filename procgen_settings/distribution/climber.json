@@ -1,0 +1,62 @@
+{
+    "0": {
+        "context": {
+            "num_platforms": 1
+        },
+        "prob": 0.16716739642977432
+    },
+    "1": {
+        "context": {
+            "num_platforms": 2
+        },
+        "prob": 0.24904457168519142
+    },
+    "2": {
+        "context": {
+            "num_platforms": 3
+        },
+        "prob": 0.08313012237565959
+    },
+    "3": {
+        "context": {
+            "num_platforms": 4
+        },
+        "prob": 0.08339059166947345
+    },
+    "4": {
+        "context": {
+            "num_platforms": 5
+        },
+        "prob": 0.1395486695857191
+    },
+    "5": {
+        "context": {
+            "num_platforms": 6
+        },
+        "prob": 0.055351970360390704
+    },
+    "6": {
+        "context": {
+            "num_platforms": 7
+        },
+        "prob": 0.055592230829684515
+    },
+    "7": {
+        "context": {
+            "num_platforms": 8
+        },
+        "prob": 0.055475468732457615
+    },
+    "8": {
+        "context": {
+            "num_platforms": 9
+        },
+        "prob": 0.05564163017851129
+    },
+    "9": {
+        "context": {
+            "num_platforms": 10
+        },
+        "prob": 0.055657348153137984
+    }
+}

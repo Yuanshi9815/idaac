@@ -1,0 +1,1082 @@
+{
+    "0": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 1,
+            "round_health": 1
+        },
+        "prob": 0.007463358896042541
+    },
+    "1": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 1,
+            "round_health": 1
+        },
+        "prob": 0.007280977389087873
+    },
+    "2": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 1,
+            "round_health": 1
+        },
+        "prob": 0.007407326023423938
+    },
+    "3": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 2,
+            "round_health": 1
+        },
+        "prob": 0.007576523325056582
+    },
+    "4": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 2,
+            "round_health": 1
+        },
+        "prob": 0.0075182930848843085
+    },
+    "5": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 2,
+            "round_health": 1
+        },
+        "prob": 0.007268891867542684
+    },
+    "6": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 3,
+            "round_health": 1
+        },
+        "prob": 0.007440286536728999
+    },
+    "7": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 3,
+            "round_health": 1
+        },
+        "prob": 0.007328220791491793
+    },
+    "8": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 3,
+            "round_health": 1
+        },
+        "prob": 0.007466654947373047
+    },
+    "9": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 4,
+            "round_health": 1
+        },
+        "prob": 0.00736447735612736
+    },
+    "10": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 4,
+            "round_health": 1
+        },
+        "prob": 0.007295260278186732
+    },
+    "11": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 4,
+            "round_health": 1
+        },
+        "prob": 0.007356786569689512
+    },
+    "12": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 5,
+            "round_health": 1
+        },
+        "prob": 0.0074809378364719065
+    },
+    "13": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 5,
+            "round_health": 1
+        },
+        "prob": 0.007635852249005691
+    },
+    "14": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 5,
+            "round_health": 1
+        },
+        "prob": 0.007500714144454943
+    },
+    "15": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 1,
+            "round_health": 2
+        },
+        "prob": 0.007580918060163924
+    },
+    "16": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 1,
+            "round_health": 2
+        },
+        "prob": 0.0072238458326924345
+    },
+    "17": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 1,
+            "round_health": 2
+        },
+        "prob": 0.007433694434067987
+    },
+    "18": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 2,
+            "round_health": 2
+        },
+        "prob": 0.007369970775011536
+    },
+    "19": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 2,
+            "round_health": 2
+        },
+        "prob": 0.007299655013294074
+    },
+    "20": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 2,
+            "round_health": 2
+        },
+        "prob": 0.007273286602650026
+    },
+    "21": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 3,
+            "round_health": 2
+        },
+        "prob": 0.007416115493638621
+    },
+    "22": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 3,
+            "round_health": 2
+        },
+        "prob": 0.007297457645740403
+    },
+    "23": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 3,
+            "round_health": 2
+        },
+        "prob": 0.00720846425981674
+    },
+    "24": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 4,
+            "round_health": 2
+        },
+        "prob": 0.007245819508229142
+    },
+    "25": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 4,
+            "round_health": 2
+        },
+        "prob": 0.0073842536641103955
+    },
+    "26": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 4,
+            "round_health": 2
+        },
+        "prob": 0.007410622074754444
+    },
+    "27": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 5,
+            "round_health": 2
+        },
+        "prob": 0.007433694434067987
+    },
+    "28": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 5,
+            "round_health": 2
+        },
+        "prob": 0.0073249247401612864
+    },
+    "29": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 5,
+            "round_health": 2
+        },
+        "prob": 0.0073150365861697686
+    },
+    "30": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 1,
+            "round_health": 3
+        },
+        "prob": 0.007301852380847744
+    },
+    "31": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 1,
+            "round_health": 3
+        },
+        "prob": 0.007412819442308115
+    },
+    "32": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 1,
+            "round_health": 3
+        },
+        "prob": 0.007471049682480389
+    },
+    "33": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 2,
+            "round_health": 3
+        },
+        "prob": 0.007362279988573688
+    },
+    "34": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 2,
+            "round_health": 3
+        },
+        "prob": 0.007317233953723439
+    },
+    "35": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 2,
+            "round_health": 3
+        },
+        "prob": 0.007407326023423938
+    },
+    "36": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 3,
+            "round_health": 3
+        },
+        "prob": 0.007205168208486233
+    },
+    "37": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 3,
+            "round_health": 3
+        },
+        "prob": 0.00727218791887319
+    },
+    "38": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 3,
+            "round_health": 3
+        },
+        "prob": 0.007407326023423938
+    },
+    "39": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 4,
+            "round_health": 3
+        },
+        "prob": 0.007398536553209255
+    },
+    "40": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 4,
+            "round_health": 3
+        },
+        "prob": 0.007541365444197851
+    },
+    "41": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 4,
+            "round_health": 3
+        },
+        "prob": 0.007439187852952164
+    },
+    "42": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 5,
+            "round_health": 3
+        },
+        "prob": 0.0075127996660001315
+    },
+    "43": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 5,
+            "round_health": 3
+        },
+        "prob": 0.007368872091234701
+    },
+    "44": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 5,
+            "round_health": 3
+        },
+        "prob": 0.00738095761277989
+    },
+    "45": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 1,
+            "round_health": 4
+        },
+        "prob": 0.0075182930848843085
+    },
+    "46": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 1,
+            "round_health": 4
+        },
+        "prob": 0.007372168142565207
+    },
+    "47": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 1,
+            "round_health": 4
+        },
+        "prob": 0.0074380891691753276
+    },
+    "48": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 2,
+            "round_health": 4
+        },
+        "prob": 0.007396339185655585
+    },
+    "49": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 2,
+            "round_health": 4
+        },
+        "prob": 0.007288668175525721
+    },
+    "50": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 2,
+            "round_health": 4
+        },
+        "prob": 0.007354589202135841
+    },
+    "51": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 3,
+            "round_health": 4
+        },
+        "prob": 0.007329319475268628
+    },
+    "52": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 3,
+            "round_health": 4
+        },
+        "prob": 0.007412819442308115
+    },
+    "53": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 3,
+            "round_health": 4
+        },
+        "prob": 0.007450174690720517
+    },
+    "54": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 4,
+            "round_health": 4
+        },
+        "prob": 0.007455668109604694
+    },
+    "55": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 4,
+            "round_health": 4
+        },
+        "prob": 0.007297457645740403
+    },
+    "56": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 4,
+            "round_health": 4
+        },
+        "prob": 0.007517194401107473
+    },
+    "57": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 5,
+            "round_health": 4
+        },
+        "prob": 0.00739963523698609
+    },
+    "58": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 5,
+            "round_health": 4
+        },
+        "prob": 0.007527082555098991
+    },
+    "59": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 5,
+            "round_health": 4
+        },
+        "prob": 0.007415016809861785
+    },
+    "60": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 1,
+            "round_health": 5
+        },
+        "prob": 0.007432595750291151
+    },
+    "61": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 1,
+            "round_health": 5
+        },
+        "prob": 0.007355687885912676
+    },
+    "62": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 1,
+            "round_health": 5
+        },
+        "prob": 0.007497418093124437
+    },
+    "63": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 2,
+            "round_health": 5
+        },
+        "prob": 0.007240326089344965
+    },
+    "64": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 2,
+            "round_health": 5
+        },
+        "prob": 0.007410622074754444
+    },
+    "65": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 2,
+            "round_health": 5
+        },
+        "prob": 0.0075292799226526624
+    },
+    "66": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 3,
+            "round_health": 5
+        },
+        "prob": 0.007418312861192292
+    },
+    "67": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 3,
+            "round_health": 5
+        },
+        "prob": 0.007391944450548243
+    },
+    "68": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 3,
+            "round_health": 5
+        },
+        "prob": 0.007297457645740403
+    },
+    "69": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 4,
+            "round_health": 5
+        },
+        "prob": 0.007578720692610253
+    },
+    "70": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 4,
+            "round_health": 5
+        },
+        "prob": 0.007284273440418379
+    },
+    "71": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 4,
+            "round_health": 5
+        },
+        "prob": 0.0073633786723505245
+    },
+    "72": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 5,
+            "round_health": 5
+        },
+        "prob": 0.007478740468918236
+    },
+    "73": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 5,
+            "round_health": 5
+        },
+        "prob": 0.007458964160935199
+    },
+    "74": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 5,
+            "round_health": 5
+        },
+        "prob": 0.0077061680107231535
+    },
+    "75": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 1,
+            "round_health": 6
+        },
+        "prob": 0.00731943132127711
+    },
+    "76": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 1,
+            "round_health": 6
+        },
+        "prob": 0.007342503680590653
+    },
+    "77": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 1,
+            "round_health": 6
+        },
+        "prob": 0.007514997033553803
+    },
+    "78": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 2,
+            "round_health": 6
+        },
+        "prob": 0.007358983937243183
+    },
+    "79": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 2,
+            "round_health": 6
+        },
+        "prob": 0.0073523918345821705
+    },
+    "80": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 2,
+            "round_health": 6
+        },
+        "prob": 0.007285372124195214
+    },
+    "81": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 3,
+            "round_health": 6
+        },
+        "prob": 0.007379858929003055
+    },
+    "82": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 3,
+            "round_health": 6
+        },
+        "prob": 0.007398536553209255
+    },
+    "83": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 3,
+            "round_health": 6
+        },
+        "prob": 0.007318332637500275
+    },
+    "84": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 4,
+            "round_health": 6
+        },
+        "prob": 0.0073633786723505245
+    },
+    "85": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 4,
+            "round_health": 6
+        },
+        "prob": 0.007412819442308115
+    },
+    "86": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 4,
+            "round_health": 6
+        },
+        "prob": 0.007498516776901273
+    },
+    "87": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 5,
+            "round_health": 6
+        },
+        "prob": 0.0072875694917488845
+    },
+    "88": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 5,
+            "round_health": 6
+        },
+        "prob": 0.007416115493638621
+    },
+    "89": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 5,
+            "round_health": 6
+        },
+        "prob": 0.007406227339647103
+    },
+    "90": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 1,
+            "round_health": 7
+        },
+        "prob": 0.00741172075853128
+    },
+    "91": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 1,
+            "round_health": 7
+        },
+        "prob": 0.007347997099474829
+    },
+    "92": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 1,
+            "round_health": 7
+        },
+        "prob": 0.0072612010811048365
+    },
+    "93": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 2,
+            "round_health": 7
+        },
+        "prob": 0.007280977389087873
+    },
+    "94": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 2,
+            "round_health": 7
+        },
+        "prob": 0.007450174690720517
+    },
+    "95": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 2,
+            "round_health": 7
+        },
+        "prob": 0.007487529939132919
+    },
+    "96": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 3,
+            "round_health": 7
+        },
+        "prob": 0.007435891801621657
+    },
+    "97": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 3,
+            "round_health": 7
+        },
+        "prob": 0.0075347733415368386
+    },
+    "98": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 3,
+            "round_health": 7
+        },
+        "prob": 0.007420510228745962
+    },
+    "99": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 4,
+            "round_health": 7
+        },
+        "prob": 0.007442483904282669
+    },
+    "100": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 4,
+            "round_health": 7
+        },
+        "prob": 0.0075347733415368386
+    },
+    "101": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 4,
+            "round_health": 7
+        },
+        "prob": 0.007338108945483311
+    },
+    "102": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 5,
+            "round_health": 7
+        },
+        "prob": 0.007505108879562284
+    },
+    "103": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 5,
+            "round_health": 7
+        },
+        "prob": 0.007332615526599134
+    },
+    "104": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 5,
+            "round_health": 7
+        },
+        "prob": 0.007405128655870267
+    },
+    "105": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 1,
+            "round_health": 8
+        },
+        "prob": 0.007406227339647103
+    },
+    "106": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 1,
+            "round_health": 8
+        },
+        "prob": 0.007435891801621657
+    },
+    "107": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 1,
+            "round_health": 8
+        },
+        "prob": 0.007419411544969127
+    },
+    "108": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 2,
+            "round_health": 8
+        },
+        "prob": 0.007328220791491793
+    },
+    "109": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 2,
+            "round_health": 8
+        },
+        "prob": 0.00742820101518381
+    },
+    "110": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 2,
+            "round_health": 8
+        },
+        "prob": 0.007514997033553803
+    },
+    "111": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 3,
+            "round_health": 8
+        },
+        "prob": 0.0073578852534663475
+    },
+    "112": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 3,
+            "round_health": 8
+        },
+        "prob": 0.007378760245226219
+    },
+    "113": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 3,
+            "round_health": 8
+        },
+        "prob": 0.007426003647630139
+    },
+    "114": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 4,
+            "round_health": 8
+        },
+        "prob": 0.007456766793381529
+    },
+    "115": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 4,
+            "round_health": 8
+        },
+        "prob": 0.007591904897932277
+    },
+    "116": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 4,
+            "round_health": 8
+        },
+        "prob": 0.007396339185655585
+    },
+    "117": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 5,
+            "round_health": 8
+        },
+        "prob": 0.007478740468918236
+    },
+    "118": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 5,
+            "round_health": 8
+        },
+        "prob": 0.007275483970203696
+    },
+    "119": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 5,
+            "round_health": 8
+        },
+        "prob": 0.007478740468918236
+    },
+    "120": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 1,
+            "round_health": 9
+        },
+        "prob": 0.007408424707200774
+    },
+    "121": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 1,
+            "round_health": 9
+        },
+        "prob": 0.007432595750291151
+    },
+    "122": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 1,
+            "round_health": 9
+        },
+        "prob": 0.007589707530378607
+    },
+    "123": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 2,
+            "round_health": 9
+        },
+        "prob": 0.007405128655870267
+    },
+    "124": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 2,
+            "round_health": 9
+        },
+        "prob": 0.007385352347887231
+    },
+    "125": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 2,
+            "round_health": 9
+        },
+        "prob": 0.007458964160935199
+    },
+    "126": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 3,
+            "round_health": 9
+        },
+        "prob": 0.007507306247115955
+    },
+    "127": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 3,
+            "round_health": 9
+        },
+        "prob": 0.0074864312553560835
+    },
+    "128": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 3,
+            "round_health": 9
+        },
+        "prob": 0.007376562877672548
+    },
+    "129": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 4,
+            "round_health": 9
+        },
+        "prob": 0.007457865477158364
+    },
+    "130": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 4,
+            "round_health": 9
+        },
+        "prob": 0.007439187852952164
+    },
+    "131": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 4,
+            "round_health": 9
+        },
+        "prob": 0.007439187852952164
+    },
+    "132": {
+        "context": {
+            "num_barriers": 1,
+            "num_rounds": 5,
+            "round_health": 9
+        },
+        "prob": 0.007507306247115955
+    },
+    "133": {
+        "context": {
+            "num_barriers": 2,
+            "num_rounds": 5,
+            "round_health": 9
+        },
+        "prob": 0.007410622074754444
+    },
+    "134": {
+        "context": {
+            "num_barriers": 3,
+            "num_rounds": 5,
+            "round_health": 9
+        },
+        "prob": 0.007460062844712035
+    }
+}
