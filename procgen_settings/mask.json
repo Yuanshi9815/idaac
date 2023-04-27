@@ -120,5 +120,42 @@
                 "99"
             ]
         }
+    },
+    "heist":{
+        "1":{
+            "masked_contexts":[
+                "0", "1", "2"
+            ]
+        },
+        "2": {
+            "masked_contexts": [
+                "3", "4", "5"
+            ]
+        },
+        "3": {
+            "masked_contexts": [
+                "1", "2"
+            ]
+        },
+        "4": {
+            "masked_contexts": [
+                "3", "4"
+            ]
+        },
+        "5": {
+            "masked_contexts": [
+                "0", "1"
+            ]
+        },
+        "6": {
+            "masked_contexts": [
+                "2", "3"
+            ]
+        },
+        "7": {
+            "masked_contexts": [
+                "4", "5"
+            ]
+        }
     }
 }
