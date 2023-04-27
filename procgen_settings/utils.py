@@ -1,5 +1,6 @@
 import os
 import json
+import random
 from procgen.default_context import default_context_options
 
 
@@ -66,6 +67,7 @@ def get_context_options(env_name, episodic_context):
         }
     elif env_name == 'leaper':
         result = {
+            **result,
             "max_log": episodic_context['num_log_lanes'],
             "min_log": episodic_context['num_log_lanes'],
             "max_road": episodic_context['num_road_lanes'],
@@ -90,8 +92,50 @@ def get_context_options(env_name, episodic_context):
 
     return result
 
+def get_context_setting(env_name, context_setting_id):
+    path = os.path.dirname(os.path.abspath(__file__))
+    json_path = os.path.join(path, 'mask.json'.format(env_name))
+    with open(json_path) as f:
+        data = json.load(f)
+    return data[env_name][context_setting_id]
 
+distribution_cache = {}
+flip_distribution_cache = {}
+
+def sample_a_conext(env_name, context_setting_id, flip=False):
+    if env_name not in distribution_cache:
+        distribution_cache[env_name] = {}
+        flip_distribution_cache[env_name] = {}
+    if context_setting_id not in distribution_cache[env_name]:
+        distribution_cache[env_name][context_setting_id] = {}
+        flip_distribution_cache[env_name][context_setting_id] = {}
+        masked_contexts = get_context_setting(env_name, context_setting_id)['masked_contexts']
+        all_prob = 0
+        flip_all_prob = 0
+        for context_id, context in get_all_episodic_context(env_name).items():
+            if context_id in masked_contexts:
+                flip_all_prob += context['prob']
+            else:
+                all_prob += context['prob']
+        for context_id, context in get_all_episodic_context(env_name).items():
+            if context_id in masked_contexts:
+                flip_distribution_cache[env_name][context_setting_id][context_id] = context['prob'] / flip_all_prob
+            else:
+                distribution_cache[env_name][context_setting_id][context_id] = context['prob'] / all_prob
+    random_num = random.random()
+    random_id = None
+    target_distribution = flip_distribution_cache[env_name][context_setting_id] if flip else distribution_cache[env_name][context_setting_id]
+    for context_id, prob in target_distribution.items():
+        if random_num < prob:
+            random_id = context_id
+            break
+        random_num -= prob
+    if random_id is None:
+        random_id = list(target_distribution.keys())[-1]
+    return get_context_options(env_name, get_all_episodic_context(env_name)[random_id]['context'])
 
 if __name__ == '__main__':
-    env_name = 'coinrun'
+    env_name = 'leaper'
     print(get_context_options(env_name, list(get_all_episodic_context(env_name).values())[0]['context']))
+    print(get_context_setting(env_name, "1"))
+    print(sample_a_conext(env_name, "3"))

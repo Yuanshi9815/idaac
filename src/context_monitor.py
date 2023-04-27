@@ -15,7 +15,7 @@ training_info_example = {
 }
 
 class ContextMonitor(object):
-    def __init__(self, target_env_ratio, context_space, log_path):
+    def __init__(self, target_env_ratio, context_space, log_path, is_test=False):
         self.target_env_ratio = target_env_ratio
         self.context_space = context_space
         self.log_path = log_path
@@ -32,6 +32,7 @@ class ContextMonitor(object):
         self.taining_info_c_env = {}
         self.taining_info_a_env = {}
 
+        self.is_test = is_test
         self.loss_info = None
 
     def add_context(self, context_str):
@@ -40,7 +41,9 @@ class ContextMonitor(object):
             self.context_str_to_id[context_str] = context_id
             self.context_id_to_str[context_id] = context_str
             self.contextual_episode_info.append(get_empty_episode_info())
-            with open(self.log_path + '/context_id_map.json', 'w') as f:
+            with open(self.log_path + '/context_id_map{}.json'.format(
+                    '_test' if self.is_test else ''
+            ), 'w') as f:
                 f.write(json.dumps({
                     'context_str_to_id': self.context_str_to_id,
                     'context_id_to_str': self.context_id_to_str,
@@ -79,8 +82,10 @@ class ContextMonitor(object):
     def after_algo_step(self):
         new_loss_info = {
             key: [float(v) for v in value.tolist()] for key, value in self.loss_info.items()
-        }
-        with open(self.log_path + '/raw_log.json', 'a') as f:
+        } if not self.is_test else {}
+        with open(self.log_path + '/raw_log{}.json'.format(
+                '_test' if self.is_test else ''
+        ), 'a') as f:
             f.write(json.dumps({
                 'loss_info': new_loss_info,
                 'contextual_episode_info': self.contextual_episode_info,

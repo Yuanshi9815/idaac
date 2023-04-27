@@ -9,6 +9,7 @@ import hyperparams as hps
 import torch
 from procgen import ProcgenEnv
 from procgen.default_context import default_context_options
+from procgen_settings.utils import sample_a_conext
 
 from baselines.common.vec_env import (
     VecExtractDictObs,
@@ -37,6 +38,7 @@ def get_env(args, env_context, device):
     venv = VecNormalize(venv=venv, ob=False)
     venv = VecPyTorchProcgen(venv, device)
     venv.get_context = penv.env.get_context
+    venv.set_context_to = penv.env.set_context_to
     return venv
 
 
@@ -55,9 +57,10 @@ def train(args):
     device = torch.device("cuda:0" if args.cuda else "cpu")
 
     run_name = '{}-{}-s{}-c{}'.format(int(time.time() * 1000),
-                                      args.env_name, args.seed, args.context)
+                                      args.env_name, args.seed, args.context_setting)
     print("Run name: ", run_name)
     context_monitor = ContextMonitor(target_env_ratio, context_space, 'log/{}'.format(run_name))
+    context_monitor_test = ContextMonitor(target_env_ratio, context_space, 'log/{}'.format(run_name), is_test=True)
 
     # 创建Log的文件夹，在'log/{}'.format(run_name)下
     if not os.path.exists('log/{}'.format(run_name)):
@@ -72,7 +75,7 @@ def train(args):
             # track hyperparameters and run metadata
             config={
                 "env_name": args.env_name,
-                "context_id": args.context,
+                "context_id": args.context_setting,
                 "seed": args.seed,
                 "algo": args.algo,
                 "num_processes": args.num_processes,
@@ -86,7 +89,13 @@ def train(args):
             "setting_des": 'softmax(loss_weight_c) * 10, target_env_ratio = 0.25'
         })
 
-    envs = get_env(args, None, device)
+    envs = get_env(args, [
+        sample_a_conext(env_name=args.env_name, context_setting_id=args.context_setting) for _ in range(args.num_processes)
+    ], device)
+
+    test_envs = get_env(args, [
+        sample_a_conext(env_name=args.env_name, context_setting_id=args.context_setting, flip=True) for _ in range(args.num_processes)
+    ], device)
 
     obs_shape = envs.observation_space.shape
     actor_critic = PPOnet(
@@ -143,6 +152,11 @@ def train(args):
                     rollouts.obs[step])
             obs, reward, done, infos = envs.step(action)
 
+            # Assign context to envs which finished the previous episode
+            for idx in (i for i, d in enumerate(done) if d):
+                envs.set_context_to(idx, sample_a_conext(env_name=args.env_name, context_setting_id=args.context_setting))
+            
+
             for (index, info) in enumerate(infos):
                 if 'episode' in info.keys():
                     context_monitor.add_episode_info(
@@ -175,80 +189,57 @@ def train(args):
 
         context_monitor.after_algo_step()
 
-        # print(loss_info)
-        # raise
-
-        log_cur_update = {
-            'total_num_steps': total_num_steps,
-            # 'frame_dist_c': [item.item() for item in fram_propotion],
-            # 'frame_dist_a': [item.item() for item in fram_propotion_all],
-            # 'ls_weights_c': [item.item() for item in loss_weights],
-            # 'ls_weights_a': [item.item() for item in loss_weights_all],
-            # 'al_weights_c': [item.item() for item in context_aloss / context_aloss.sum()],
-            # 'vl_weights_c': [item.item() for item in context_vloss / context_vloss.sum()],
-            # 'al_weights_a': [item.item() for item in context_aloss_all / context_aloss_all.sum()],
-            # 'vl_weights_a': [item.item() for item in context_vloss_all / context_vloss_all.sum()],
-            # 'ls_weights_p': [item.item() for item in loss_weights_p],
-            # 'contexts_rwd': [np.mean(each) if len(each) > 0 else 0.0 for each in context_episode_reward],
-            # 'contexts_len': [np.mean(each) if len(each) > 0 else 0.0 for each in context_episode_length],
-        }
-
-        for key, value in log_cur_update.items():
-            if key == 'total_num_steps':
-                print('total_num_steps: ', value, 'mean_reward: ',
+        # Print Logs per update
+        print('total_num_steps: ', total_num_steps, 'mean_reward: ',
                       np.mean(context_monitor.episode_info_t_env['episode_return']))
-                pass
-            elif key == 'contexts_len':
-                print(key, ['{:>05.0f}'.format(item) for item in value])
-            elif key == 'contexts_rwd':
-                print(key, ['{:>05.2f}'.format(item) for item in value])
-            else:
-                print(key, ['{:>05.3f}'.format(item) for item in value])
-
-        # Save Model per args.model_save_interval total_num_steps
-        if total_num_steps / args.model_save_interval > cur_save:
-            cur_save += 1
-            if use_wandb:
-                if not os.path.exists(os.path.join(wandb.run.dir, 'models')):
-                    os.makedirs(os.path.join(wandb.run.dir, 'models'))
-                torch.save(actor_critic, os.path.join(wandb.run.dir,
-                           'models/model_{}.pt'.format(total_num_steps)))
-                wandb.save(os.path.join(wandb.run.dir,
-                           'models/model_{}.pt'.format(total_num_steps)))
-
-        # Save Logs
+      
+        # Print Logs
         if j % args.log_interval == 0:
-            total_num_steps = (j + 1) * args.num_processes * args.num_steps
-            logs = {
-                "time_stamp": time.time(),
-                "update": j,
-                "total_num_steps": total_num_steps,
-                "value_loss": value_loss,
-                "action_loss": action_loss,
-                "dist_entropy": dist_entropy,
-            }
             if len(context_monitor.episode_info_t_env['episode_length']) > 1:
                 episode_returns = context_monitor.episode_info_t_env['episode_return']
-                episode_lengths = context_monitor.episode_info_t_env['episode_length']
-                logs = {**logs, **{
-                    "mean_reward": np.mean(episode_returns).item(),
-                    "median_reward": np.median(episode_returns).item(),
-                    "min_reward": np.min(episode_returns).item(),
-                    "max_reward": np.max(episode_returns).item(),
-                    "mean_length": np.mean(episode_lengths).item(),
-                    "median_length": np.median(episode_lengths).item(),
-                    "min_length": np.min(episode_lengths).item(),
-                    "max_length": np.max(episode_lengths).item(),
-                    "episode_info": context_monitor.episode_info_t_env,
-                }}
-            if use_wandb:
-                wandb.log(logs)
             print("\nTime: {}".format(
                 datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
             print("Update {}, step {}:".format(j, total_num_steps))
             print("Last {} training episodes, mean/median reward {:.2f}/{:.2f}"
                   .format(len(episode_returns), np.mean(episode_returns),
                           np.median(episode_returns)))
+            # Evaluating on the test envs
+            print("Evaluating on the test envs...")
+            evaluation(test_envs, actor_critic, context_monitor_test)
+            
+def evaluation(envs, actor_critic, context_monitor, min_episodes_num=5, max_steps_num=1000):
+    obs = envs.reset()
+    for step_i in range(max_steps_num * 2):
+        context_monitor.before_algo_step()
+        contexts_idxs = context_monitor.extent(envs.get_context())
+        with torch.no_grad():
+            value, action, action_log_prob = actor_critic.act(obs)
+        obs, reward, done, infos = envs.step(action)
+        # Assign context to envs which finished the previous episode
+        for idx in (i for i, d in enumerate(done) if d):
+            envs.set_context_to(idx, sample_a_conext(env_name=args.env_name, context_setting_id=args.context_setting, flip=True))
+        # Record episode info
+        for (index, info) in enumerate(infos):
+            if 'episode' in info.keys():
+                context_monitor.add_episode_info(
+                    contexts_idxs[index],
+                    index < args.num_processes * 0.5,
+                    {
+                        'episode_return': float(info['episode']['r']),
+                        'episode_length': int(info['episode']['l'])
+                    }
+                )
+        contexts_episodes_num = [
+            len(each['episode_length']) for each in context_monitor.contextual_episode_info
+        ]
+        if np.all(np.array(contexts_episodes_num) >= min_episodes_num):
+            print("case 1")
+            break
+        if np.all(np.array(contexts_episodes_num) >= 1) and step_i > max_steps_num:
+            print("case 2")
+            break
+    context_monitor.after_algo_step()
+    
 
 
 if __name__ == "__main__":
