@@ -52,8 +52,8 @@ def get_context_options(env_name, episodic_context):
     elif env_name == 'fruitbot':
         result = {
             **result,
-            "max_num_fruits": episodic_context['num_good'],
-            "min_num_fruits": episodic_context['num_good'],
+            "max_fruits": episodic_context['num_good'],
+            "min_fruits": episodic_context['num_good'],
             "min_foods": episodic_context['num_bad'],
             "max_foods": episodic_context['num_bad'],
         }

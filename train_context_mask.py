@@ -133,6 +133,7 @@ def train(args):
     nsteps = torch.zeros(args.num_processes)
     cur_save = 1
 
+    episode_returns = []
 
     for j in range(num_updates):
         # Before algo update
@@ -201,16 +202,16 @@ def train(args):
                 datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
             print("Update {}, step {}:".format(j, total_num_steps))
             print("Last {} training episodes, mean/median reward {:.2f}/{:.2f}"
-                  .format(len(episode_returns), np.mean(episode_returns),
-                          np.median(episode_returns)))
+                .format(len(episode_returns), np.mean(episode_returns),
+                        np.median(episode_returns)))
             # Evaluating on the test envs
             print("Evaluating on the test envs...")
             evaluation(test_envs, actor_critic, context_monitor_test)
             
 def evaluation(envs, actor_critic, context_monitor, min_episodes_num=5, max_steps_num=1000):
     obs = envs.reset()
+    context_monitor.before_algo_step()
     for step_i in range(max_steps_num * 2):
-        context_monitor.before_algo_step()
         contexts_idxs = context_monitor.extent(envs.get_context())
         with torch.no_grad():
             value, action, action_log_prob = actor_critic.act(obs)
