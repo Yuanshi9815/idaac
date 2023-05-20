@@ -55,7 +55,7 @@ def train(args):
     device = torch.device("cuda:0" if args.cuda else "cpu")
 
     run_name = '{}-{}-s{}-c{}'.format(int(time.time() * 1000),
-                                      args.env_name, args.seed, args.context)
+                                      args.env_name, args.seed, args.context_setting)
     print("Run name: ", run_name)
     context_monitor = ContextMonitor(target_env_ratio, context_space, 'log/{}'.format(run_name))
 

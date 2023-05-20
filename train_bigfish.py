@@ -220,7 +220,7 @@ def evaluation(envs, actor_critic, context_monitor, min_episodes_num=5, max_step
         obs, reward, done, infos = envs.step(action)
         # Assign context to envs which finished the previous episode
         for idx in (i for i, d in enumerate(done) if d):
-            envs.set_context_to(idx, sample_bigfish_conext())
+            envs.set_context_to(idx, sample_bigfish_conext(hardmode=False))
         # Record episode info
         for (index, info) in enumerate(infos):
             if 'episode' in info.keys():
