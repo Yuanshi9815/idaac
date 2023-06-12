@@ -4,111 +4,27 @@
             "num_log_lanes": 0,
             "num_road_lanes": 0
         },
-        "prob": 0.06267410463337696
+        "prob": 0.25
     },
     "1": {
         "context": {
             "num_log_lanes": 1,
-            "num_road_lanes": 0
+            "num_road_lanes": 1
         },
-        "prob": 0.06265005180267058
+        "prob": 0.25
     },
     "2": {
         "context": {
             "num_log_lanes": 2,
-            "num_road_lanes": 0
+            "num_road_lanes": 2
         },
-        "prob": 0.06238591608769128
+        "prob": 0.25
     },
     "3": {
         "context": {
             "num_log_lanes": 3,
-            "num_road_lanes": 0
-        },
-        "prob": 0.06258145669287832
-    },
-    "4": {
-        "context": {
-            "num_log_lanes": 0,
-            "num_road_lanes": 1
-        },
-        "prob": 0.062280796309048585
-    },
-    "5": {
-        "context": {
-            "num_log_lanes": 1,
-            "num_road_lanes": 1
-        },
-        "prob": 0.062352063955586005
-    },
-    "6": {
-        "context": {
-            "num_log_lanes": 2,
-            "num_road_lanes": 1
-        },
-        "prob": 0.06274492685712352
-    },
-    "7": {
-        "context": {
-            "num_log_lanes": 3,
-            "num_road_lanes": 1
-        },
-        "prob": 0.06253424187704727
-    },
-    "8": {
-        "context": {
-            "num_log_lanes": 0,
-            "num_road_lanes": 2
-        },
-        "prob": 0.0627462631254961
-    },
-    "9": {
-        "context": {
-            "num_log_lanes": 1,
-            "num_road_lanes": 2
-        },
-        "prob": 0.06255695843938108
-    },
-    "10": {
-        "context": {
-            "num_log_lanes": 2,
-            "num_road_lanes": 2
-        },
-        "prob": 0.06250172601331458
-    },
-    "11": {
-        "context": {
-            "num_log_lanes": 3,
-            "num_road_lanes": 2
-        },
-        "prob": 0.06244560274166636
-    },
-    "12": {
-        "context": {
-            "num_log_lanes": 0,
             "num_road_lanes": 3
         },
-        "prob": 0.0626585148356969
-    },
-    "13": {
-        "context": {
-            "num_log_lanes": 1,
-            "num_road_lanes": 3
-        },
-        "prob": 0.06221487373600147
-    },
-    "14": {
-        "context": {
-            "num_log_lanes": 2,
-            "num_road_lanes": 3
-        },
-        "prob": 0.06234939141884085
-    },
-    "15": {
-        "context": {
-            "num_log_lanes": 3,
-            "num_road_lanes": 3
-        },
-        "prob": 0.062323111474180175
+        "prob": 0.25
     }
 }

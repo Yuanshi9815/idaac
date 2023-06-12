@@ -89,10 +89,15 @@ def train(args):
     envs = get_env(args, None, device)
 
     obs_shape = envs.observation_space.shape
+    base_kwargs = {'hidden_size': args.hidden_size}
+    if args.env_name in ['bossfight', 'dodgeball']:
+        args.lr = 1e-3
+        base_kwargs['channels'] = [32, 64, 64]
+        # base_kwargs['hidden_size'] = 256
     actor_critic = PPOnet(
         obs_shape,
         envs.action_space.n,
-        base_kwargs={'hidden_size': args.hidden_size}
+        base_kwargs=base_kwargs
     )
     actor_critic.to(device)
     print("\n Actor-Critic Network: ", actor_critic)
@@ -227,6 +232,7 @@ def train(args):
                 "action_loss": action_loss,
                 "dist_entropy": dist_entropy,
             }
+            episode_returns = []
             if len(context_monitor.episode_info_t_env['episode_length']) > 1:
                 episode_returns = context_monitor.episode_info_t_env['episode_return']
                 episode_lengths = context_monitor.episode_info_t_env['episode_length']

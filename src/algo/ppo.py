@@ -45,6 +45,18 @@ class PPO():
         action_loss_epoch = 0
         dist_entropy_epoch = 0
 
+        ploss_t = torch.zeros(self.context_space)
+        vloss_t = torch.zeros(self.context_space)
+        entrp_t = torch.zeros(self.context_space)
+        tloss_t = torch.zeros(self.context_space)
+        steps_t = torch.zeros(self.context_space)
+        ploss_c = torch.zeros(self.context_space)
+        vloss_c = torch.zeros(self.context_space)
+        entrp_c = torch.zeros(self.context_space)
+        tloss_c = torch.zeros(self.context_space)
+        steps_c = torch.zeros(self.context_space)
+
+
         for e in range(self.ppo_epoch):
             data_generator = rollouts.feed_forward_generator(
                 advantages, self.num_mini_batch)
@@ -83,16 +95,6 @@ class PPO():
                 value_loss_separated = value_loss.view(-1, 1) * loss_mask
                 dist_entropy_separated = dist_entropy.view(-1, 1) * loss_mask
 
-                ploss_t = torch.zeros(self.context_space)
-                vloss_t = torch.zeros(self.context_space)
-                entrp_t = torch.zeros(self.context_space)
-                tloss_t = torch.zeros(self.context_space)
-                ploss_c = torch.zeros(self.context_space)
-                vloss_c = torch.zeros(self.context_space)
-                entrp_c = torch.zeros(self.context_space)
-                tloss_c = torch.zeros(self.context_space)
-
-
                 # 将loss mask对应的loss加到target上，将1-loss mask对应的loss加到contextal上
                 ploss_t.index_add_(0, context_idx, action_loss_separated[:, 0].abs().cpu().detach())
                 vloss_t.index_add_(0, context_idx, value_loss_separated[:, 0].abs().cpu().detach())
@@ -102,6 +104,9 @@ class PPO():
                 vloss_c.index_add_(0, context_idx, value_loss_separated[:, 1].abs().cpu().detach())
                 entrp_c.index_add_(0, context_idx, dist_entropy_separated[:, 1].abs().cpu().detach())
                 tloss_c.index_add_(0, context_idx, (action_loss_separated[:, 1] + value_loss_separated[:, 1] - dist_entropy_separated[:, 1] * self.entropy_coef).abs().cpu().detach())
+
+                steps_t.index_add_(0, context_idx, torch.ones_like(context_idx) * loss_mask[:, 0].sum().cpu().detach())
+                steps_c.index_add_(0, context_idx, torch.ones_like(context_idx) * loss_mask[:, 1].sum().cpu().detach())
 
                 self.optimizer.zero_grad()
                 (value_loss.mean() * self.value_loss_coef + action_loss.mean() -
@@ -121,13 +126,15 @@ class PPO():
 
         loss_info = {
             'policy_loss_t': ploss_t,
-            'value_loss_t': vloss_t,
-            'entropy_t': entrp_t,
             'policy_loss_c': ploss_c,
+            'value_loss_t': vloss_t,
             'value_loss_c': vloss_c,
+            'entropy_t': entrp_t,
             'entropy_c': entrp_c,
             'total_loss_t': tloss_t,
-            'total_loss_c': tloss_c
+            'total_loss_c': tloss_c,
+            'steps_t': steps_t,
+            'steps_c': steps_c,
         }
 
         return value_loss_epoch, action_loss_epoch, dist_entropy_epoch, loss_info

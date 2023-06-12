@@ -9,7 +9,7 @@ import hyperparams as hps
 import torch
 from procgen import ProcgenEnv
 from procgen.default_context import default_context_options
-from procgen_settings.utils import sample_a_conext
+from procgen_settings.utils import sample_a_leaper_context
 
 from baselines.common.vec_env import (
     VecExtractDictObs,
@@ -59,12 +59,11 @@ def train(args):
     run_name = '{}-{}-s{}-c{}'.format(int(time.time() * 1000),
                                       args.env_name, args.seed, args.context_setting)
     print("Run name: ", run_name)
-    context_monitor = ContextMonitor(target_env_ratio, context_space, 'loss_context_mask/{}'.format(run_name))
-    context_monitor_test = ContextMonitor(target_env_ratio, context_space, 'loss_context_mask/{}'.format(run_name), is_test=True)
+    context_monitor = ContextMonitor(target_env_ratio, context_space, 'loss_context_expand/{}'.format(run_name))
 
     # 创建Log的文件夹，在'log/{}'.format(run_name)下
-    if not os.path.exists('loss_context_mask/{}'.format(run_name)):
-        os.makedirs('loss_context_mask/{}'.format(run_name))
+    if not os.path.exists('loss_context_expand/{}'.format(run_name)):
+        os.makedirs('loss_context_expand/{}'.format(run_name))
 
     # wandb init
     if use_wandb:
@@ -90,11 +89,7 @@ def train(args):
         })
 
     envs = get_env(args, [
-        sample_a_conext(env_name=args.env_name, context_setting_id=args.context_setting) for _ in range(args.num_processes)
-    ], device)
-
-    test_envs = get_env(args, [
-        sample_a_conext(env_name=args.env_name, context_setting_id=args.context_setting, flip=True) for _ in range(args.num_processes)
+        sample_a_leaper_context(env_name=args.env_name, context_setting_id=args.context_setting) for _ in range(args.num_processes)
     ], device)
 
     obs_shape = envs.observation_space.shape
@@ -155,7 +150,7 @@ def train(args):
 
             # Assign context to envs which finished the previous episode
             for idx in (i for i, d in enumerate(done) if d):
-                envs.set_context_to(idx, sample_a_conext(env_name=args.env_name, context_setting_id=args.context_setting))
+                envs.set_context_to(idx, sample_a_leaper_context(env_name=args.env_name, context_setting_id=args.context_setting))
             
 
             for (index, info) in enumerate(infos):
@@ -206,41 +201,7 @@ def train(args):
                         np.median(episode_returns)))
             # Evaluating on the test envs
             print("Evaluating on the test envs...")
-            evaluation(test_envs, actor_critic, context_monitor_test)
             
-def evaluation(envs, actor_critic, context_monitor, min_episodes_num=5, max_steps_num=1000):
-    obs = envs.reset()
-    context_monitor.before_algo_step()
-    for step_i in range(max_steps_num * 2):
-        contexts_idxs = context_monitor.extent(envs.get_context())
-        with torch.no_grad():
-            value, action, action_log_prob = actor_critic.act(obs)
-        obs, reward, done, infos = envs.step(action)
-        # Assign context to envs which finished the previous episode
-        for idx in (i for i, d in enumerate(done) if d):
-            envs.set_context_to(idx, sample_a_conext(env_name=args.env_name, context_setting_id=args.context_setting, flip=True))
-        # Record episode info
-        for (index, info) in enumerate(infos):
-            if 'episode' in info.keys():
-                context_monitor.add_episode_info(
-                    contexts_idxs[index],
-                    index < args.num_processes * 0.5,
-                    {
-                        'episode_return': float(info['episode']['r']),
-                        'episode_length': int(info['episode']['l'])
-                    }
-                )
-        contexts_episodes_num = [
-            len(each['episode_length']) for each in context_monitor.contextual_episode_info
-        ]
-        if np.all(np.array(contexts_episodes_num) >= min_episodes_num):
-            print("case 1")
-            break
-        if np.all(np.array(contexts_episodes_num) >= 1) and step_i > max_steps_num:
-            print("case 2")
-            break
-    context_monitor.after_algo_step()
-    
 
 
 if __name__ == "__main__":

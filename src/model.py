@@ -140,7 +140,9 @@ class ResNetBase(NNBase):
         self.flatten = Flatten()
         self.relu = nn.ReLU()
 
-        self.fc = init_relu_(nn.Linear(2048, hidden_size))
+        num_flatten = 2048 if channels[-1] == 32 else 4096
+
+        self.fc = init_relu_(nn.Linear(num_flatten, hidden_size))
         self.critic_linear = init_(nn.Linear(hidden_size, 1))
 
         apply_init_(self.modules())

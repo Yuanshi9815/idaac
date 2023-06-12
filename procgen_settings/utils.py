@@ -134,6 +134,27 @@ def sample_a_conext(env_name, context_setting_id, flip=False):
         random_id = list(target_distribution.keys())[-1]
     return get_context_options(env_name, get_all_episodic_context(env_name)[random_id]['context'])
 
+def sample_a_leaper_context(env_name='leaper', context_setting_id=1, flip=False):
+    setting_dict = {
+        "1": [(0, 2), (0, 3), (1, 3), (2, 0), (3, 0), (3, 1)],
+        "2": [(0, 3), (3, 0)],
+        "3": [(0, 1), (0, 2), (1, 0), (1, 2), (1, 3), (2, 0), (2, 1), (2, 3), (3, 1), (3, 2)],
+    }
+    # num_log_lanes, num_sections
+    while True:
+        context = (
+            random.randint(0, 3),
+            random.randint(0, 3),
+        )
+        if context not in setting_dict[context_setting_id]:
+            break
+    episodic_context = {
+        'num_log_lanes': context[0],
+        'num_road_lanes': context[1],
+    }
+    return get_context_options(env_name, episodic_context)
+    
+
 if __name__ == '__main__':
     env_name = 'leaper'
     print(get_context_options(env_name, list(get_all_episodic_context(env_name).values())[0]['context']))
