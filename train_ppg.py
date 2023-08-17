@@ -107,7 +107,7 @@ def train(args):
 
     batch_size = int(args.num_processes * args.num_steps / args.num_mini_batch)
 
-    agent = algo.PPO(
+    agent = algo.PPG(
         actor_critic,
         args.clip_param,
         args.ppo_epoch,
@@ -117,7 +117,8 @@ def train(args):
         lr=args.lr,
         eps=args.eps,
         context_space=context_space,
-        max_grad_norm=args.max_grad_norm)
+        max_grad_norm=args.max_grad_norm,
+        )
 
     obs = envs.reset()
     rollouts.obs[0].copy_(obs)
@@ -173,7 +174,7 @@ def train(args):
 
         rollouts.compute_returns(next_value, args.gamma, args.gae_lambda)
         value_loss, action_loss, dist_entropy, loss_info = agent.update(
-            rollouts, None)
+            rollouts, j, 16)
         rollouts.after_update()
 
         context_monitor.add_step_info(loss_info)
@@ -259,4 +260,5 @@ def train(args):
 
 if __name__ == "__main__":
     args = parser.parse_args()
+    print(args)
     train(args)

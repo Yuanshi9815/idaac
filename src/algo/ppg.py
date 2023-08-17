@@ -2,6 +2,8 @@ import random
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.distributions import Categorical
+from torch.distributions.kl import kl_divergence
 import torch.optim as optim
 import numpy as np
 
@@ -19,7 +21,9 @@ class PPG():
                  context_space,
                  lr=None,
                  eps=None,
-                 max_grad_norm=None, ):
+                 max_grad_norm=None, 
+                 ppg_auxiliary_epoch=8,
+                 kl_coef=1):
 
         self.actor_critic = actor_critic
 
@@ -34,8 +38,36 @@ class PPG():
 
         self.optimizer = optim.Adam(actor_critic.parameters(), lr=lr, eps=eps)
         self.context_space = context_space
+        self.ppg_auxiliary_epoch = ppg_auxiliary_epoch
+        self.kl_coef = kl_coef
+
+    def update_auxiliary(self, rollouts, episode_i, auxiliary_interval_n):
+        for e in range(self.ppg_auxiliary_epoch):
+            data_generator = rollouts.feed_forward_generator(None, self.num_mini_batch)
+            for sample in data_generator:
+                obs_batch, actions_batch, value_preds_batch, return_batch, \
+                    old_action_log_probs_batch, adv_targ, context_idx, loss_mask = sample
+                
+                values, action_log_probs, dist_entropy = self.actor_critic.evaluate_actions(
+                    obs_batch, actions_batch)
+                
+                aux_loss = (values - return_batch).pow(2)
+                kl_loss = kl_divergence(
+                    Categorical(action_log_probs),
+                    Categorical(old_action_log_probs_batch)
+                ).unsqueeze(1).float()
+
+                sum_loss = aux_loss + kl_loss * self.kl_coef
+
+                # update loss
+                self.optimizer.zero_grad()
+                (sum_loss.mean()).backward()
+                nn.utils.clip_grad_norm_(self.actor_critic.parameters(),
+                                        self.max_grad_norm)
+                self.optimizer.step()
 
         
+
     def update(self, rollouts, episode_i, auxiliary_interval_n):
         advantages = rollouts.returns[:-1] - rollouts.value_preds[:-1]
         advantages = (advantages - advantages.mean()) / (
@@ -136,5 +168,8 @@ class PPG():
             'steps_t': steps_t,
             'steps_c': steps_c,
         }
+        
+        if not episode_i % auxiliary_interval_n:
+            auxiliary_log = self.update_auxiliary(rollouts, episode_i, auxiliary_interval_n)
 
         return value_loss_epoch, action_loss_epoch, dist_entropy_epoch, loss_info
