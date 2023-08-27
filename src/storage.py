@@ -107,5 +107,14 @@ class RolloutStorage(object):
             else:
                 adv_targ = advantages.view(-1, 1)[indices]
 
+            if obs_batch.device != 'cuda':
+                obs_batch = obs_batch.to('cuda')
+                actions_batch = actions_batch.to('cuda')
+                value_preds_batch = value_preds_batch.to('cuda')
+                return_batch = return_batch.to('cuda')
+                old_action_log_probs_batch = old_action_log_probs_batch.to('cuda')
+                # adv_targ = adv_targ.to('cuda')
+                context_idx_batch = context_idx_batch.to('cuda')
+                loss_weight_mask_batch = loss_weight_mask_batch.to('cuda')
             yield obs_batch, actions_batch, value_preds_batch, \
                 return_batch, old_action_log_probs_batch, adv_targ, context_idx_batch, loss_weight_mask_batch

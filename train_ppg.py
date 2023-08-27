@@ -25,6 +25,7 @@ from src.storage import RolloutStorage
 from src.envs import VecPyTorchProcgen
 from src.context_monitor import ContextMonitor
 
+auxiliary_interval = 32
 
 def get_env(args, env_context, device):
     penv = ProcgenEnv(num_envs=args.num_processes, env_name=args.env_name,
@@ -105,6 +106,10 @@ def train(args):
     rollouts = RolloutStorage(args.num_steps, args.num_processes,
                               envs.observation_space.shape, envs.action_space, target_env_ratio)
 
+
+    rollouts_aux = RolloutStorage(args.num_steps * auxiliary_interval, args.num_processes,
+                              envs.observation_space.shape, envs.action_space, target_env_ratio)
+
     batch_size = int(args.num_processes * args.num_steps / args.num_mini_batch)
 
     agent = algo.PPG(
@@ -123,6 +128,8 @@ def train(args):
     obs = envs.reset()
     rollouts.obs[0].copy_(obs)
     rollouts.to(device)
+
+    rollouts_aux.obs[0].copy_(obs)
 
     num_updates = int(
         args.num_env_steps) // args.num_steps // args.num_processes
@@ -168,14 +175,22 @@ def train(args):
             nsteps[done == True] = 0
             rollouts.insert(obs, action, action_log_prob, value,
                             reward, masks, contexts_idxs)
+            rollouts_aux.insert(obs, action, action_log_prob, value,
+                            reward, masks, contexts_idxs)
 
         with torch.no_grad():
             next_value = actor_critic.get_value(rollouts.obs[-1]).detach()
 
         rollouts.compute_returns(next_value, args.gamma, args.gae_lambda)
         value_loss, action_loss, dist_entropy, loss_info = agent.update(
-            rollouts, j, 16)
+            rollouts)
         rollouts.after_update()
+
+        if not (j+1) % auxiliary_interval:
+            rollouts_aux.compute_returns(next_value, args.gamma, args.gae_lambda)
+            agent.update_auxiliary(
+                rollouts_aux)
+            rollouts_aux.after_update()
 
         context_monitor.add_step_info(loss_info)
 

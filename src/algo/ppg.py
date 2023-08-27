@@ -22,13 +22,13 @@ class PPG():
                  lr=None,
                  eps=None,
                  max_grad_norm=None, 
-                 ppg_auxiliary_epoch=8,
+                 ppg_auxiliary_epoch=6,
                  kl_coef=1):
 
         self.actor_critic = actor_critic
 
         self.clip_param = clip_param
-        self.ppo_epoch = ppo_epoch
+        self.ppo_epoch = 1
         self.num_mini_batch = num_mini_batch
 
         self.value_loss_coef = value_loss_coef
@@ -41,9 +41,9 @@ class PPG():
         self.ppg_auxiliary_epoch = ppg_auxiliary_epoch
         self.kl_coef = kl_coef
 
-    def update_auxiliary(self, rollouts, episode_i, auxiliary_interval_n):
+    def update_auxiliary(self, rollouts):
         for e in range(self.ppg_auxiliary_epoch):
-            data_generator = rollouts.feed_forward_generator(None, self.num_mini_batch)
+            data_generator = rollouts.feed_forward_generator(None, self.num_mini_batch * 32 * 2)
             for sample in data_generator:
                 obs_batch, actions_batch, value_preds_batch, return_batch, \
                     old_action_log_probs_batch, adv_targ, context_idx, loss_mask = sample
@@ -68,7 +68,7 @@ class PPG():
 
         
 
-    def update(self, rollouts, episode_i, auxiliary_interval_n):
+    def update(self, rollouts):
         advantages = rollouts.returns[:-1] - rollouts.value_preds[:-1]
         advantages = (advantages - advantages.mean()) / (
             advantages.std() + 1e-5)
@@ -169,7 +169,7 @@ class PPG():
             'steps_c': steps_c,
         }
         
-        if not episode_i % auxiliary_interval_n:
-            auxiliary_log = self.update_auxiliary(rollouts, episode_i, auxiliary_interval_n)
+        # if not episode_i % auxiliary_interval_n:
+        #     auxiliary_log = self.update_auxiliary(rollouts, episode_i, auxiliary_interval_n)
 
         return value_loss_epoch, action_loss_epoch, dist_entropy_epoch, loss_info
