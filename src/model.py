@@ -343,6 +343,10 @@ class PPOnet(nn.Module):
         dist_entropy = dist.entropy()
         return value, action_log_probs, dist_entropy
 
+    def get_probs(self, inputs):
+        value, actor_features = self.base(inputs)
+        dist = self.dist(actor_features)
+        return dist.probs
 
 class IDAACnet(nn.Module):
     """

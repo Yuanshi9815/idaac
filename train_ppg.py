@@ -123,6 +123,7 @@ def train(args):
         eps=args.eps,
         context_space=context_space,
         max_grad_norm=args.max_grad_norm,
+        auxiliary_interval=auxiliary_interval
         )
 
     obs = envs.reset()
@@ -188,6 +189,7 @@ def train(args):
 
         if not (j+1) % auxiliary_interval:
             rollouts_aux.compute_returns(next_value, args.gamma, args.gae_lambda)
+            rollouts_aux.calculate_probs(actor_critic)
             agent.update_auxiliary(
                 rollouts_aux)
             rollouts_aux.after_update()

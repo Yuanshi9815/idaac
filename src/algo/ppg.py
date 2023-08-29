@@ -23,7 +23,8 @@ class PPG():
                  eps=None,
                  max_grad_norm=None, 
                  ppg_auxiliary_epoch=6,
-                 kl_coef=1):
+                 kl_coef=1, 
+                 auxiliary_interval = 32):
 
         self.actor_critic = actor_critic
 
@@ -40,22 +41,28 @@ class PPG():
         self.context_space = context_space
         self.ppg_auxiliary_epoch = ppg_auxiliary_epoch
         self.kl_coef = kl_coef
+        self.auxiliary_interval = auxiliary_interval
 
     def update_auxiliary(self, rollouts):
         for e in range(self.ppg_auxiliary_epoch):
-            data_generator = rollouts.feed_forward_generator(None, self.num_mini_batch * 32 * 2)
+            data_generator = rollouts.feed_forward_generator(None, self.num_mini_batch * self.auxiliary_interval * 2, return_dist_probs=True)
             for sample in data_generator:
                 obs_batch, actions_batch, value_preds_batch, return_batch, \
-                    old_action_log_probs_batch, adv_targ, context_idx, loss_mask = sample
+                    old_action_log_probs_batch, adv_targ, context_idx, loss_mask, old_dist_probs = sample
                 
                 values, action_log_probs, dist_entropy = self.actor_critic.evaluate_actions(
                     obs_batch, actions_batch)
                 
+                dist_probs = self.actor_critic.get_probs(obs_batch)
+                
                 aux_loss = (values - return_batch).pow(2)
-                kl_loss = kl_divergence(
-                    Categorical(action_log_probs),
-                    Categorical(old_action_log_probs_batch)
-                ).unsqueeze(1).float()
+                try:
+                    kl_loss = kl_divergence(
+                        Categorical(dist_probs),
+                        Categorical(old_dist_probs)
+                    ).unsqueeze(1).float()
+                except:
+                    print(action_log_probs.shape)
 
                 sum_loss = aux_loss + kl_loss * self.kl_coef
 

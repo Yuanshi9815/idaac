@@ -19,6 +19,8 @@ class RolloutStorage(object):
         else:
             action_shape = action_space.shape[0]
         self.actions = torch.zeros(num_steps, num_processes, action_shape)
+        action_num = action_space.n if action_space.__class__.__name__ == 'Discrete' else action_space.shape[0]
+        self.dist_probs = torch.zeros(num_steps, num_processes, action_num)
         if action_space.__class__.__name__ == 'Discrete':
             self.actions = self.actions.long()
         self.masks = torch.ones(num_steps + 1, num_processes, 1)
@@ -72,7 +74,8 @@ class RolloutStorage(object):
     def feed_forward_generator(self,
                                advantages,
                                num_mini_batch=None,
-                               mini_batch_size=None):
+                               mini_batch_size=None,
+                               return_dist_probs=False):
         num_steps, num_processes = self.rewards.size()[0:2]
         batch_size = num_processes * num_steps
         self.loss_weight_masks[:,:int(num_processes*self.target_env_ratio),:] = 1.0
@@ -102,6 +105,9 @@ class RolloutStorage(object):
                                                                     1)[indices]
             context_idx_batch = self.context_idxs.view(-1, 1)[indices]
             loss_weight_mask_batch = self.loss_weight_masks.view(-1, 1)[indices]
+
+            dist_probs_batch = self.dist_probs.view(-1, self.dist_probs.size(-1))[indices] if return_dist_probs else None
+
             if advantages is None:
                 adv_targ = None
             else:
@@ -116,5 +122,18 @@ class RolloutStorage(object):
                 # adv_targ = adv_targ.to('cuda')
                 context_idx_batch = context_idx_batch.to('cuda')
                 loss_weight_mask_batch = loss_weight_mask_batch.to('cuda')
+                if return_dist_probs:
+                    dist_probs_batch = dist_probs_batch.to('cuda')
+            
+            if return_dist_probs:
+                yield obs_batch, actions_batch, value_preds_batch, \
+                    return_batch, old_action_log_probs_batch, adv_targ, context_idx_batch, loss_weight_mask_batch, dist_probs_batch
+                continue
+
             yield obs_batch, actions_batch, value_preds_batch, \
                 return_batch, old_action_log_probs_batch, adv_targ, context_idx_batch, loss_weight_mask_batch
+
+    def calculate_probs(self, model):
+        with torch.no_grad():
+            for step in range(self.num_steps):
+                self.dist_probs[step] = model.get_probs(self.obs[step].to('cuda'))
